@@ -235,11 +235,12 @@ export default function Navbar() {
                 </div>
               </>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', position: 'relative', zIndex: 100 }}>
                 <Link href="/auth/login" style={{
                   fontSize: '14px', fontWeight: 600, color: '#7C3AED',
                   padding: '8px 16px', borderRadius: '10px',
                   textDecoration: 'none', transition: 'all 0.2s',
+                  pointerEvents: 'auto',
                 }}
                   onMouseEnter={e => (e.currentTarget.style.background = '#EDE9FE')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
@@ -253,6 +254,7 @@ export default function Navbar() {
                   background: 'linear-gradient(135deg, #8B5CF6, #7C3AED)',
                   boxShadow: '0 4px 14px rgba(139,92,246,0.35)',
                   transition: 'all 0.2s',
+                  pointerEvents: 'auto',
                 }}>
                   Daftar
                 </Link>

@@ -36,27 +36,41 @@ export default function SearchPage() {
 
   const fetchResults = async () => {
     setLoading(true);
+
+    if (query) {
+      // 1. Try Smart Search (FTS RPC) First
+      const { data: rpcData, error: rpcError } = await supabase.rpc('search_products', {
+        search_query: query,
+        category_filter: filters.category || null,
+        condition_filter: filters.condition || null,
+        min_price: filters.minPrice ? parseInt(filters.minPrice) : null,
+        max_price: filters.maxPrice ? parseInt(filters.maxPrice) : null
+      });
+
+      if (!rpcError && rpcData) {
+        const formattedData = rpcData.map((p: any) => ({
+          ...p,
+          store: { id: p.store_id, name: p.store_name, is_verified: p.store_is_verified },
+          images: [{ image_url: p.image_url, is_primary: true }]
+        }));
+        setProducts(formattedData);
+        setLoading(false);
+        return;
+      }
+    }
+
+    // 2. Fallback to basic search if RPC fails or query is empty
     let q = supabase
       .from('products')
-      .select('*, store:stores(name,slug,rating), images:product_images(*), category:categories(name,slug)')
+      .select('*, store:stores(name,slug,rating,is_verified), images:product_images(*), category:categories(name,slug)')
       .eq('is_active', true)
       .gt('stock', 0);
 
-    if (query) {
-      q = q.ilike('title', `%${query}%`);
-    }
-    if (filters.category) {
-      q = q.eq('category_id', filters.category);
-    }
-    if (filters.condition) {
-      q = q.eq('condition', filters.condition);
-    }
-    if (filters.minPrice) {
-      q = q.gte('price', parseInt(filters.minPrice));
-    }
-    if (filters.maxPrice) {
-      q = q.lte('price', parseInt(filters.maxPrice));
-    }
+    if (query) q = q.ilike('title', `%${query}%`);
+    if (filters.category) q = q.eq('category_id', filters.category);
+    if (filters.condition) q = q.eq('condition', filters.condition);
+    if (filters.minPrice) q = q.gte('price', parseInt(filters.minPrice));
+    if (filters.maxPrice) q = q.lte('price', parseInt(filters.maxPrice));
 
     const { data } = await q.order('created_at', { ascending: false });
     setProducts(data ?? []);
@@ -188,9 +202,22 @@ export default function SearchPage() {
                 <div className="pl-empty-icon text-7xl mb-4 inline-block">🔍</div>
                 <h3 className="pl-empty-title text-xl font-black mb-2 text-indigo-950">Oops, barang tidak ditemukan</h3>
                 <p className="pl-empty-sub text-gray-500 mb-6">Coba ubah filter atau kata kunci pencarian kamu.</p>
-                <button onClick={() => setFilters({ category: '', condition: '', minPrice: '', maxPrice: '' })} className="pl-btn-primary">
+                <button onClick={() => setFilters({ category: '', condition: '', minPrice: '', maxPrice: '' })} className="pl-btn-primary mb-10">
                   Reset Filter
                 </button>
+                
+                {/* Rekomendasi Cerdas */}
+                <div className="text-left p-6 bg-purple-50 rounded-3xl border border-purple-100 max-w-lg mx-auto">
+                  <h4 className="font-black text-lg text-slate-900 mb-2 flex items-center gap-2">💡 Rekomendasi Cerdas AI</h4>
+                  <p className="text-sm text-slate-600 font-medium mb-4 leading-relaxed">Sistem Smart Search kami tidak menemukan kecocokan yang persis dengan pencarianmu. Coba gunakan kata kunci yang lebih umum.</p>
+                  <div className="flex flex-wrap gap-2">
+                    {['Baju', 'Sepatu', 'Tas', 'Hijab'].map(tag => (
+                      <Link key={tag} href={`/search?q=${tag}`} className="px-4 py-2 bg-white rounded-xl text-sm font-bold text-purple-600 border border-purple-100 hover:border-purple-300 transition-colors shadow-sm">
+                        Cari "{tag}"
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="pl-product-grid">
@@ -213,9 +240,16 @@ export default function SearchPage() {
                         </button>
                       </div>
                       <div className="pl-product-info">
-                        <div className="pl-product-store">
+                        <div className="pl-product-store flex items-center gap-1.5">
                           <Store className="w-3 h-3" />
                           <span>{product.store?.name ?? 'Toko'}</span>
+                          {product.store?.is_verified && (
+                            <div className="w-3.5 h-3.5 rounded-full bg-blue-500 flex items-center justify-center" title="Verified Seller">
+                              <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                          )}
                         </div>
                         <h3 className="pl-product-title">{product.title}</h3>
                         <div className="pl-product-footer">

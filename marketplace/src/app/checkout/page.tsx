@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
-import { Upload, X, MapPin, Truck, CreditCard, CheckCircle } from 'lucide-react';
+import { Upload, X, MapPin, Truck, CreditCard, CheckCircle, ShieldCheck } from 'lucide-react';
 
 const COURIERS = ['JNE', 'JNT', 'SiCepat', 'AnterAja', 'COD'];
 
@@ -34,7 +34,12 @@ export default function CheckoutPage() {
       supabase.from('cart_items').select('*, product:products(*, images:product_images(*), store:stores(*))').eq('user_id', user!.id),
       supabase.from('bank_accounts').select('*').eq('is_active', true).order('sort_order'),
     ]);
-    if (cart) setCartItems(cart);
+    if (cart) {
+      const searchParams = new URLSearchParams(window.location.search);
+      const itemsParam = searchParams.get('items');
+      const filteredCart = itemsParam ? cart.filter(c => itemsParam.split(',').includes(c.id)) : cart;
+      setCartItems(filteredCart);
+    }
     if (banks && banks.length > 0) { setBankAccounts(banks); setSelectedBank(banks[0]); }
   };
 
@@ -55,7 +60,16 @@ export default function CheckoutPage() {
   };
 
   const subtotal = cartItems.reduce((sum, i) => sum + (i.product?.price ?? 0) * i.quantity, 0);
-  const shippingCost = selectedCourier === 'COD' ? 0 : 15000;
+  
+  const byStore: Record<string, any[]> = {};
+  cartItems.forEach(ci => {
+    const sid = ci.product?.store_id;
+    if (!byStore[sid]) byStore[sid] = [];
+    byStore[sid].push(ci);
+  });
+  
+  const storeCount = Object.keys(byStore).length || 1;
+  const shippingCost = selectedCourier === 'COD' ? 0 : 15000 * storeCount;
   const total = subtotal + shippingCost;
 
   const handleOrder = async () => {
@@ -90,7 +104,7 @@ export default function CheckoutPage() {
           storeItems.map(ci => ({ order_id: order.id, product_id: ci.product_id, quantity: ci.quantity, price: ci.product.price, product_snapshot: ci.product }))
         );
       }
-      await supabase.from('cart_items').delete().eq('user_id', user!.id);
+      await supabase.from('cart_items').delete().in('id', cartItems.map(c => c.id));
       toast.success('Pesanan berhasil dibuat! 🎉');
       router.push('/orders');
     } catch { toast.error('Gagal membuat pesanan. Coba lagi!'); }
@@ -180,6 +194,20 @@ export default function CheckoutPage() {
               <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Catatan untuk penjual..." rows={3}
                 className="w-full px-5 py-4 rounded-2xl border-2 border-slate-100 text-sm focus:outline-none focus:border-purple-400 bg-slate-50 resize-none transition-colors font-medium text-slate-700 placeholder:text-slate-400" />
             </Section>
+            {/* Escrow Banner */}
+            <div className="bento-card bg-purple-50 p-6 border border-purple-100 shadow-[0_4px_20px_rgba(139,92,246,0.05)] mt-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center text-purple-600 flex-shrink-0">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-900 text-base mb-1">Transaksi Aman Terlindungi</h3>
+                  <p className="text-sm text-slate-600 font-medium leading-relaxed">
+                    Pembayaran Anda dilindungi oleh sistem Escrow PreLove. Dana akan ditahan dengan aman dan baru diteruskan ke penjual setelah Anda mengonfirmasi bahwa pesanan telah diterima dengan baik.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Order Summary */}
@@ -191,25 +219,32 @@ export default function CheckoutPage() {
               </h2>
               
               <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2 scrollbar-hide">
-                {cartItems.map(ci => {
-                  const img = ci.product?.images?.find((i: any) => i.is_primary)?.image_url ?? ci.product?.images?.[0]?.image_url;
-                  return (
-                    <div key={ci.id} className="flex items-center gap-4 p-3 bg-slate-50 rounded-2xl border border-slate-100">
-                      <div className="w-14 h-14 rounded-xl bg-white border border-slate-100 flex-shrink-0 overflow-hidden shadow-sm">
-                        {img ? <img src={img} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center">📦</div>}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-slate-800 line-clamp-1 mb-1">{ci.product?.title}</p>
-                        <p className="text-xs font-bold text-slate-500">{ci.quantity}x · <span className="text-purple-600">{formatPrice(ci.product?.price ?? 0)}</span></p>
-                      </div>
+                {Object.entries(byStore).map(([storeId, items]) => (
+                  <div key={storeId} className="mb-4">
+                    <p className="text-xs font-black text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1">🏪 {items[0]?.product?.store?.name}</p>
+                    <div className="space-y-2">
+                      {items.map(ci => {
+                        const img = ci.product?.images?.find((i: any) => i.is_primary)?.image_url ?? ci.product?.images?.[0]?.image_url;
+                        return (
+                          <div key={ci.id} className="flex items-center gap-4 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                            <div className="w-14 h-14 rounded-xl bg-white border border-slate-100 flex-shrink-0 overflow-hidden shadow-sm">
+                              {img ? <img src={img} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center">📦</div>}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-bold text-slate-800 line-clamp-1 mb-1">{ci.product?.title}</p>
+                              <p className="text-xs font-bold text-slate-500">{ci.quantity}x · <span className="text-purple-600">{formatPrice(ci.product?.price ?? 0)}</span></p>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
 
               <div className="border-t-2 border-dashed border-slate-100 pt-5 space-y-3 text-sm font-medium">
                 <div className="flex justify-between"><span className="text-slate-500">Subtotal</span><span className="font-bold text-slate-900">{formatPrice(subtotal)}</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Ongkir ({selectedCourier})</span><span className="font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md">{selectedCourier === 'COD' ? 'GRATIS' : formatPrice(shippingCost)}</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">Ongkir ({selectedCourier})</span><span className="font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-md">{selectedCourier === 'COD' ? 'GRATIS' : `${formatPrice(shippingCost)} (${storeCount} Toko)`}</span></div>
                 <div className="flex justify-between font-black text-lg pt-3 mt-3 border-t-2 border-dashed border-slate-100 items-end">
                   <span className="text-slate-900">Total</span><span className="text-purple-600 text-2xl leading-none">{formatPrice(total)}</span>
                 </div>

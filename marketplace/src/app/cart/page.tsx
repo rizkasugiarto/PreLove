@@ -7,12 +7,13 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
-import { Trash2, ShoppingBag, ArrowRight, Minus, Plus } from 'lucide-react';
+import { Trash2, ShoppingBag, ArrowRight, Minus, Plus, Store } from 'lucide-react';
 
 export default function CartPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [items, setItems] = useState<any[]>([]);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { if (user) fetchCart(); else setLoading(false); }, [user]);
@@ -21,7 +22,7 @@ export default function CartPage() {
     setLoading(true);
     const { data } = await supabase
       .from('cart_items')
-      .select('*, product:products(*, images:product_images(*), store:stores(name))')
+      .select('*, product:products(*, images:product_images(*), store:stores(id,name))')
       .eq('user_id', user!.id);
     setItems(data ?? []);
     setLoading(false);
@@ -37,10 +38,36 @@ export default function CartPage() {
   const removeItem = async (id: string) => {
     await supabase.from('cart_items').delete().eq('id', id);
     setItems(prev => prev.filter(i => i.id !== id));
+    setSelectedItems(prev => prev.filter(selectedId => selectedId !== id));
     toast.success('Item dihapus dari keranjang');
   };
 
-  const subtotal = items.reduce((sum, i) => sum + (i.product?.price ?? 0) * i.quantity, 0);
+  const handleSelectItem = (id: string) => {
+    setSelectedItems(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
+  const handleSelectStore = (storeId: string, storeItems: any[]) => {
+    const itemIds = storeItems.map(i => i.id);
+    const allSelected = itemIds.every(id => selectedItems.includes(id));
+    
+    if (allSelected) {
+      setSelectedItems(prev => prev.filter(id => !itemIds.includes(id)));
+    } else {
+      setSelectedItems(prev => [...new Set([...prev, ...itemIds])]);
+    }
+  };
+
+  const selectedCartItems = items.filter(i => selectedItems.includes(i.id));
+  const subtotal = selectedCartItems.reduce((sum, i) => sum + (i.product?.price ?? 0) * i.quantity, 0);
+
+  const groupedItems = items.reduce((acc: any, item: any) => {
+    const storeId = item.product?.store?.id;
+    if (!acc[storeId]) {
+      acc[storeId] = { storeName: item.product?.store?.name, items: [] };
+    }
+    acc[storeId].items.push(item);
+    return acc;
+  }, {});
 
   if (!user) return (
     <div className="min-h-screen bg-[#F8F7FF] pt-32 pb-32 flex items-center justify-center relative">
@@ -95,36 +122,71 @@ export default function CartPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Cart Items */}
-            <div className="lg:col-span-8 space-y-4">
-              {items.map((item) => {
-                const img = item.product?.images?.find((i: any) => i.is_primary)?.image_url ?? item.product?.images?.[0]?.image_url;
+            <div className="lg:col-span-8 space-y-6">
+              {Object.entries(groupedItems).map(([storeId, group]: [string, any]) => {
+                const storeItemIds = group.items.map((i: any) => i.id);
+                const isStoreSelected = storeItemIds.every((id: string) => selectedItems.includes(id));
+
                 return (
-                  <div key={item.id} className="bento-card bg-white p-5 lg:p-6 flex gap-5 border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:border-purple-200 transition-colors group">
-                    <Link href={`/products/${item.product_id}`} className="flex-shrink-0">
-                      <div className="w-24 h-24 lg:w-28 lg:h-28 rounded-2xl overflow-hidden bg-slate-50 border border-slate-100 relative group-hover:shadow-md transition-shadow">
-                        {img ? <img src={img} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" /> : <div className="w-full h-full flex items-center justify-center text-3xl">📦</div>}
-                      </div>
-                    </Link>
-                    <div className="flex-1 min-w-0 flex flex-col">
-                      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">🏪 {item.product?.store?.name}</p>
-                      <Link href={`/products/${item.product_id}`}>
-                        <h3 className="font-bold text-slate-900 text-base leading-snug line-clamp-2 hover:text-purple-600 transition-colors mb-2">{item.product?.title}</h3>
-                      </Link>
-                      <p className="text-purple-600 font-black text-lg mt-auto">{formatPrice(item.product?.price ?? 0)}</p>
+                  <div key={storeId} className="bento-card bg-white p-5 lg:p-6 border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:border-purple-200 transition-colors">
+                    {/* Store Header */}
+                    <div className="flex items-center gap-3 mb-4 pb-3 border-b border-slate-100">
+                      <label className="flex items-center cursor-pointer">
+                        <input type="checkbox" checked={isStoreSelected} onChange={() => handleSelectStore(storeId, group.items)} 
+                          className="w-5 h-5 rounded border-slate-300 text-purple-600 focus:ring-purple-500 cursor-pointer" />
+                      </label>
+                      <h3 className="font-bold text-slate-900 flex items-center gap-2">
+                        <Store className="w-4 h-4 text-purple-500" /> {group.storeName}
+                      </h3>
                     </div>
-                    <div className="flex flex-col items-end justify-between gap-3 ml-2">
-                      <button onClick={() => removeItem(item.id)} className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                      <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                        <button onClick={() => updateQty(item.id, item.quantity - 1, item.product?.stock)} className="w-9 h-9 flex items-center justify-center hover:bg-slate-200 transition-colors text-slate-600 font-black">
-                          <Minus className="w-3.5 h-3.5" />
-                        </button>
-                        <span className="w-8 text-center text-sm font-black text-slate-900">{item.quantity}</span>
-                        <button onClick={() => updateQty(item.id, item.quantity + 1, item.product?.stock)} className="w-9 h-9 flex items-center justify-center hover:bg-slate-200 transition-colors text-slate-600 font-black">
-                          <Plus className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
+
+                    {/* Items */}
+                    <div className="space-y-4">
+                      {group.items.map((item: any) => {
+                        const img = item.product?.images?.find((i: any) => i.is_primary)?.image_url ?? item.product?.images?.[0]?.image_url;
+                        const isSelected = selectedItems.includes(item.id);
+                        
+                        return (
+                          <div key={item.id} className="flex gap-4 group/item relative">
+                            {/* Checkbox */}
+                            <div className="flex items-center pt-2 md:pt-4">
+                              <input type="checkbox" checked={isSelected} onChange={() => handleSelectItem(item.id)} 
+                                className="w-5 h-5 rounded border-slate-300 text-purple-600 focus:ring-purple-500 cursor-pointer" />
+                            </div>
+                            
+                            {/* Product Image */}
+                            <Link href={`/products/${item.product_id}`} className="flex-shrink-0">
+                              <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden bg-slate-50 border border-slate-100 relative group-hover/item:shadow-md transition-shadow">
+                                {img ? <img src={img} alt="" className="w-full h-full object-cover group-hover/item:scale-105 transition-transform" /> : <div className="w-full h-full flex items-center justify-center text-2xl">📦</div>}
+                              </div>
+                            </Link>
+
+                            {/* Info */}
+                            <div className="flex-1 min-w-0 flex flex-col py-1">
+                              <Link href={`/products/${item.product_id}`}>
+                                <h4 className="font-bold text-slate-900 text-[15px] leading-snug line-clamp-2 hover:text-purple-600 transition-colors mb-1">{item.product?.title}</h4>
+                              </Link>
+                              <p className="text-purple-600 font-black text-base mt-auto">{formatPrice(item.product?.price ?? 0)}</p>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex flex-col items-end justify-between py-1">
+                              <button onClick={() => removeItem(item.id)} className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors">
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                              <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg overflow-hidden shadow-sm h-8">
+                                <button onClick={() => updateQty(item.id, item.quantity - 1, item.product?.stock)} className="w-8 h-full flex items-center justify-center hover:bg-slate-200 transition-colors text-slate-600 font-black">
+                                  <Minus className="w-3 h-3" />
+                                </button>
+                                <span className="w-6 text-center text-[13px] font-black text-slate-900">{item.quantity}</span>
+                                <button onClick={() => updateQty(item.id, item.quantity + 1, item.product?.stock)} className="w-8 h-full flex items-center justify-center hover:bg-slate-200 transition-colors text-slate-600 font-black">
+                                  <Plus className="w-3 h-3" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );
@@ -140,7 +202,7 @@ export default function CartPage() {
                 </h2>
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between text-sm font-medium">
-                    <span className="text-slate-500">Subtotal ({items.length} item)</span>
+                    <span className="text-slate-500">Subtotal ({selectedItems.length} item)</span>
                     <span className="font-bold text-slate-900">{formatPrice(subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-sm font-medium">
@@ -155,8 +217,12 @@ export default function CartPage() {
                   </div>
                 </div>
                 <button
-                  onClick={() => router.push('/checkout')}
-                  className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white font-black rounded-2xl transition-all shadow-[0_8px_20px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                  onClick={() => {
+                    if (selectedItems.length === 0) { toast.error('Pilih barang yang mau dicheckout!'); return; }
+                    router.push(`/checkout?items=${selectedItems.join(',')}`);
+                  }}
+                  disabled={selectedItems.length === 0}
+                  className="w-full py-4 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white font-black rounded-2xl transition-all shadow-[0_8px_20px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 flex items-center justify-center gap-2"
                 >
                   Checkout Sekarang <ArrowRight className="w-5 h-5" />
                 </button>

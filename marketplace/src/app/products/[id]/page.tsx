@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { formatPrice, CONDITIONS, formatRelativeTime } from '@/lib/utils';
 import toast from 'react-hot-toast';
-import { ShoppingCart, MessageCircle, Star, Store, ChevronLeft, ChevronRight, Shield, Package } from 'lucide-react';
+import { ShoppingCart, MessageCircle, Star, Store, ChevronLeft, ChevronRight, Shield, Package, ShieldCheck } from 'lucide-react';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -194,7 +194,16 @@ export default function ProductDetailPage() {
                   {product.store?.logo_url ? <img src={product.store.logo_url} alt="" className="w-full h-full object-cover" /> : <Store className="w-6 h-6 text-purple-500" />}
                 </div>
                 <div>
-                  <p className="font-black text-lg text-slate-900 group-hover:text-purple-700 transition-colors leading-tight mb-1">{product.store?.name}</p>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <p className="font-black text-lg text-slate-900 group-hover:text-purple-700 transition-colors leading-tight">{product.store?.name}</p>
+                    {product.store?.is_verified && (
+                      <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center shadow-sm" title="Verified Seller">
+                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
                   <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">⭐ {product.store?.rating?.toFixed(1)} <span className="mx-1.5 opacity-50">•</span> {product.store?.total_sales} Terjual</p>
                 </div>
               </div>
@@ -204,12 +213,12 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Safety Info */}
-            <div className="flex items-start gap-4 p-5 bg-emerald-50/50 border border-emerald-100 rounded-3xl mt-6">
-              <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                <Shield className="w-5 h-5 text-emerald-600" />
+            <div className="flex items-start gap-4 p-5 bg-purple-50/50 border border-purple-100 rounded-3xl mt-6">
+              <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                <ShieldCheck className="w-5 h-5 text-purple-600" />
               </div>
-              <p className="text-sm text-emerald-800 font-semibold leading-relaxed pt-1.5">
-                Pembayaran manual transfer. Upload bukti transfer setelah checkout, dan penjual akan segera mengkonfirmasi pesananmu.
+              <p className="text-sm text-purple-800 font-semibold leading-relaxed pt-1.5">
+                <span className="font-black">Transaksi Aman.</span> Dana ditahan oleh sistem Escrow PreLove hingga barang kamu terima dengan baik.
               </p>
             </div>
           </div>
