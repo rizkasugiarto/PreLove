@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { formatPrice, formatDate, ORDER_STATUS } from '@/lib/utils';
-import { ArrowLeft, Package, MapPin, CreditCard, ChevronRight, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Package, MapPin, Store, CreditCard, ChevronRight, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 

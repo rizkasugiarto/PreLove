@@ -49,7 +49,8 @@ export default function SellerProductsPage() {
     if (!confirm('Yakin ingin menghapus produk ini?')) return;
     const { error } = await supabase.from('products').delete().eq('id', id);
     if (error) {
-      toast.error('Gagal menghapus produk');
+      console.error("Delete product error:", error);
+      toast.error(error.message || error.details || 'Gagal menghapus produk');
     } else {
       toast.success('Produk berhasil dihapus');
       setProducts(prev => prev.filter(p => p.id !== id));

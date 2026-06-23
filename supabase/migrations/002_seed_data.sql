@@ -23,4 +23,5 @@ INSERT INTO bank_accounts (bank_name, account_number, account_name, sort_order) 
 ('BNI', '0987654321', 'PreLove Marketplace', 2),
 ('BRI', '1122334455', 'PreLove Marketplace', 3),
 ('GoPay', '081234567890', 'PreLove Marketplace', 4),
-('OVO', '081234567890', 'PreLove Marketplace', 5);
+('OVO', '081234567890', 'PreLove Marketplace', 5)
+ON CONFLICT (account_number) DO NOTHING;

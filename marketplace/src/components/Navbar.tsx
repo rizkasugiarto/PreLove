@@ -24,6 +24,10 @@ export default function Navbar() {
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 8);
     window.addEventListener('scroll', fn);
+    
+    // Auto-cleanup expired stock reservations silently in background
+    supabase.rpc('cleanup_expired_orders').then().catch(() => {});
+    
     return () => window.removeEventListener('scroll', fn);
   }, []);
   useEffect(() => {
@@ -146,7 +150,7 @@ export default function Navbar() {
 
             {user ? (
               <>
-                <NavIconLink href="/wishlist" className="hidden md:flex"><Heart size={20} /></NavIconLink>
+
                 <NavIconLink href="/chat" className="hidden md:flex"><MessageCircle size={20} /></NavIconLink>
                 <NavIconLink href="/notifications"><Bell size={20} /></NavIconLink>
                 <NavIconLink href="/cart">
@@ -215,7 +219,7 @@ export default function Navbar() {
                         </p>
                       </div>
                       <DDItem href="/orders" icon={<Package size={16} />} label="Pesanan Saya" close={() => setDropdownOpen(false)} />
-                      <DDItem href="/wishlist" icon={<Heart size={16} />} label="Wishlist" close={() => setDropdownOpen(false)} />
+
                       {profile?.store
                         ? <DDItem href="/seller/dashboard" icon={<Store size={16} />} label="Toko Saya" close={() => setDropdownOpen(false)} />
                         : <DDItem href="/seller/open-store" icon={<Store size={16} />} label="Buka Toko" close={() => setDropdownOpen(false)} />

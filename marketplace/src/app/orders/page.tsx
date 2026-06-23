@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { formatPrice, formatDate, ORDER_STATUS } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import { Package, ArrowRight, Store, Clock } from 'lucide-react';
 
 const TABS = ['Semua', 'Menunggu', 'Diproses', 'Dikirim', 'Selesai'];
 const TAB_STATUS: Record<string, string[]> = {
@@ -46,84 +47,149 @@ export default function OrdersPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-black text-gray-900 mb-6">📦 Pesanan Saya</h1>
-
-      {/* Tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide">
-        {TABS.map(tab => (
-          <button key={tab} onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${activeTab === tab ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/20' : 'bg-white text-gray-600 border border-gray-200 hover:border-violet-300'}`}>
-            {tab}
-          </button>
-        ))}
+    <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at top left, #EDE9FE 0%, #F5F3FF 40%, #EFF6FF 100%)', color: '#111827', paddingBottom: '128px', paddingTop: '112px', position: 'relative' }}>
+      {/* Aurora Blobs */}
+      <div className="absolute top-0 left-0 w-full h-[500px] overflow-hidden pointer-events-none">
+        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[80%] rounded-full blur-[120px] bg-purple-300/40 mix-blend-multiply" />
+        <div className="absolute top-[10%] -right-[10%] w-[40%] h-[60%] rounded-full blur-[100px] bg-emerald-200/40 mix-blend-multiply" />
       </div>
 
-      {loading ? (
-        <div className="space-y-4">{[...Array(3)].map((_, i) => <div key={i} className="bg-white rounded-2xl h-32 animate-pulse" />)}</div>
-      ) : orders.length === 0 ? (
-        <div className="text-center py-20">
-          <div className="text-6xl mb-4">📭</div>
-          <h2 className="text-xl font-black text-gray-800 mb-2">Belum Ada Pesanan</h2>
-          <p className="text-gray-500 mb-6">Yuk mulai belanja preloved!</p>
-          <Link href="/" className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold rounded-2xl shadow-lg shadow-violet-500/30">
-            Belanja Sekarang
-          </Link>
+      <div style={{ maxWidth: '900px', margin: '0 auto', position: 'relative', zIndex: 10, padding: '0 16px' }}>
+        
+        {/* Header Glass Card */}
+        <div style={{
+          background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
+          borderRadius: '24px', border: '1px solid rgba(255,255,255,0.9)',
+          boxShadow: '0 12px 32px rgba(124,58,237,0.06), 0 4px 12px rgba(0,0,0,0.02)',
+          padding: '24px', marginBottom: '24px',
+          display: 'flex', alignItems: 'center', gap: '20px'
+        }}>
+          <div style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'linear-gradient(135deg, #C4B5FD, #A855F7)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 8px 16px rgba(168,85,247,0.2)' }}>
+            <Package size={32} color="white" />
+          </div>
+          <div>
+            <h1 style={{ fontSize: '24px', fontWeight: 900, margin: '0 0 4px 0', letterSpacing: '-0.5px' }}>Pesanan Saya</h1>
+            <p style={{ fontSize: '14px', color: '#6B7280', margin: 0 }}>Pantau dan kelola semua riwayat belanja preloved kamu di sini.</p>
+          </div>
         </div>
-      ) : (
-        <div className="space-y-4">
-          {orders.map(order => {
-            const status = ORDER_STATUS[order.status] ?? ORDER_STATUS.pending;
-            const snapshot = order.items?.[0]?.product_snapshot as any;
-            const img = snapshot?.images?.find((i: any) => i.is_primary)?.image_url ?? snapshot?.images?.[0]?.image_url;
-            return (
-              <div key={order.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                {/* Header */}
-                <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-gray-600">🏪 {order.store?.name}</span>
-                  </div>
-                  <span className={`text-xs font-black px-2.5 py-1 rounded-full ${status.color}`}>
-                    {status.emoji} {status.label}
-                  </span>
-                </div>
 
-                {/* Body */}
-                <div className="p-5 flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-xl bg-gray-100 flex-shrink-0 overflow-hidden">
-                    {img ? <img src={img} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-2xl">📦</div>}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-gray-900 text-sm line-clamp-1">{snapshot?.title ?? 'Produk'}</p>
-                    {order.items?.length > 1 && <p className="text-xs text-gray-400">+{order.items.length - 1} produk lainnya</p>}
-                    <p className="text-xs text-gray-400 mt-1">{formatDate(order.created_at)}</p>
-                    <p className="font-black text-violet-600 mt-1">{formatPrice(order.total)}</p>
-                  </div>
-                </div>
-
-                {/* Footer Actions */}
-                <div className="px-5 py-3 border-t border-gray-100 flex items-center justify-between">
-                  {order.tracking_number && (
-                    <p className="text-xs text-gray-500">🚚 Resi: <span className="font-bold text-violet-600">{order.tracking_number}</span></p>
-                  )}
-                  <div className="flex gap-2 ml-auto">
-                    {order.status === 'shipped' && (
-                      <button onClick={() => confirmReceived(order.id)} className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-xl transition-colors">
-                        ✅ Terima Barang
-                      </button>
-                    )}
-                    {order.status === 'delivered' && (
-                      <Link href={`/review/${order.id}`} className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl transition-colors">
-                        ⭐ Beri Ulasan
-                      </Link>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+        {/* Liquid Tabs */}
+        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px', marginBottom: '24px' }} className="scrollbar-hide">
+          {TABS.map(tab => (
+            <button key={tab} onClick={() => setActiveTab(tab)}
+              style={{
+                padding: '10px 20px', borderRadius: '16px', fontSize: '14px', fontWeight: 800, whiteSpace: 'nowrap', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                background: activeTab === tab ? 'linear-gradient(135deg, #8B5CF6, #6D28D9)' : 'rgba(255,255,255,0.7)',
+                color: activeTab === tab ? '#FFF' : '#6B7280',
+                border: activeTab === tab ? 'none' : '1px solid rgba(139,92,246,0.1)',
+                boxShadow: activeTab === tab ? '0 8px 16px rgba(109,40,217,0.2)' : 'none',
+              }}>
+              {tab}
+            </button>
+          ))}
         </div>
-      )}
+
+        {/* Content Area */}
+        {loading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {[...Array(3)].map((_, i) => (
+              <div key={i} style={{ background: 'rgba(255,255,255,0.6)', height: '140px', borderRadius: '24px', animation: 'pulse 1.5s infinite ease-in-out' }} />
+            ))}
+          </div>
+        ) : orders.length === 0 ? (
+          <div style={{
+            background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(20px)', borderRadius: '32px',
+            border: '1px dashed rgba(168,85,247,0.3)', padding: '64px 20px', textAlign: 'center',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <div style={{ fontSize: '72px', marginBottom: '16px', filter: 'drop-shadow(0 10px 10px rgba(0,0,0,0.05))' }}>📭</div>
+            <h2 style={{ fontSize: '20px', fontWeight: 900, color: '#1F2937', marginBottom: '8px' }}>Belum Ada Pesanan</h2>
+            <p style={{ color: '#6B7280', marginBottom: '24px' }}>Yuk mulai belanja item preloved unik yang ramah lingkungan!</p>
+            <Link href="/" style={{
+              display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 28px',
+              background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)', color: 'white', fontWeight: 800,
+              borderRadius: '999px', textDecoration: 'none', boxShadow: '0 8px 20px rgba(109,40,217,0.25)',
+              transition: 'transform 0.2s',
+            }}
+            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              Mulai Belanja <ArrowRight size={16} />
+            </Link>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {orders.map(order => {
+              const status = ORDER_STATUS[order.status] ?? ORDER_STATUS.pending;
+              const snapshot = order.items?.[0]?.product_snapshot as any;
+              const img = snapshot?.images?.find((i: any) => i.is_primary)?.image_url ?? snapshot?.images?.[0]?.image_url;
+              return (
+                <div key={order.id} style={{
+                  background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(24px)',
+                  borderRadius: '24px', border: '1px solid rgba(255,255,255,1)',
+                  boxShadow: '0 4px 12px rgba(124,58,237,0.03)', overflow: 'hidden',
+                  transition: 'transform 0.2s, box-shadow 0.2s'
+                }}
+                onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(124,58,237,0.08)'; }}
+                onMouseOut={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(124,58,237,0.03)'; }}
+                >
+                  {/* Order Header */}
+                  <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(249,250,251,0.5)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Store size={14} color="#8B5CF6" />
+                      <span style={{ fontSize: '13px', fontWeight: 800, color: '#374151' }}>{order.store?.name}</span>
+                    </div>
+                    <span className={status.color} style={{ fontSize: '12px', fontWeight: 900, padding: '4px 10px', borderRadius: '999px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      {status.emoji} {status.label}
+                    </span>
+                  </div>
+
+                  {/* Order Body */}
+                  <div style={{ padding: '20px', display: 'flex', gap: '16px', alignItems: 'center' }}>
+                    <div style={{ width: '80px', height: '80px', borderRadius: '16px', background: '#F3F4F6', overflow: 'hidden', flexShrink: 0, border: '1px solid rgba(0,0,0,0.05)' }}>
+                      {img ? <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px' }}>📦</div>}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontWeight: 800, color: '#1F2937', fontSize: '15px', margin: '0 0 4px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{snapshot?.title ?? 'Produk Preloved'}</p>
+                      {order.items?.length > 1 && <p style={{ fontSize: '12px', color: '#8B5CF6', fontWeight: 700, margin: '0 0 4px 0' }}>+{order.items.length - 1} produk lainnya</p>}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#9CA3AF', fontSize: '12px', marginBottom: '8px' }}>
+                        <Clock size={12} /> {formatDate(order.created_at)}
+                      </div>
+                      <p style={{ fontWeight: 900, color: '#7C3AED', fontSize: '16px', margin: 0 }}>{formatPrice(order.total)}</p>
+                    </div>
+                  </div>
+
+                  {/* Order Footer */}
+                  <div style={{ padding: '16px 20px', borderTop: '1px solid rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.9)' }}>
+                    <div>
+                      {order.tracking_number ? (
+                        <p style={{ fontSize: '12px', color: '#6B7280', margin: 0 }}>🚚 Resi: <span style={{ fontWeight: 800, color: '#7C3AED' }}>{order.tracking_number}</span></p>
+                      ) : <span />}
+                    </div>
+                    
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      {order.status === 'shipped' && (
+                        <button onClick={() => confirmReceived(order.id)} style={{
+                          padding: '8px 16px', background: '#10B981', color: 'white', fontSize: '13px', fontWeight: 800, borderRadius: '12px', border: 'none', cursor: 'pointer', boxShadow: '0 4px 10px rgba(16,185,129,0.2)'
+                        }}>
+                          ✅ Konfirmasi Diterima
+                        </button>
+                      )}
+                      {order.status === 'delivered' && (
+                        <Link href={`/review/${order.id}`} style={{
+                          padding: '8px 16px', background: '#F59E0B', color: 'white', fontSize: '13px', fontWeight: 800, borderRadius: '12px', textDecoration: 'none', boxShadow: '0 4px 10px rgba(245,158,11,0.2)'
+                        }}>
+                          ⭐ Beri Ulasan
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

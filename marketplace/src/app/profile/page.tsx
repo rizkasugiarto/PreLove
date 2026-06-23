@@ -138,9 +138,7 @@ export default function ProfilePage() {
               <Link href="/orders" className="sidebar-link">
                 <Package className="w-4 h-4" /> Pesanan Saya
               </Link>
-              <Link href="/wishlist" className="sidebar-link">
-                <Heart className="w-4 h-4" /> Wishlist
-              </Link>
+
               {profile?.store ? (
                 <Link href="/seller/dashboard" className="sidebar-link">
                   <Store className="w-4 h-4" /> Toko Saya

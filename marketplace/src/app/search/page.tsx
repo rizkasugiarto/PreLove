@@ -235,9 +235,7 @@ export default function SearchPage() {
                         <span className={`pl-product-cond ${cond?.color ?? 'bg-gray-100 text-gray-600'}`}>
                           {cond?.label?.split(' ').slice(1).join(' ') ?? product.condition}
                         </span>
-                        <button className="pl-product-wish">
-                          <Heart className="w-3.5 h-3.5" />
-                        </button>
+
                       </div>
                       <div className="pl-product-info">
                         <div className="pl-product-store flex items-center gap-1.5">

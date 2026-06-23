@@ -409,9 +409,7 @@ function ProductCard({ product }: { product: any }) {
             {cond.label}
           </span>
         )}
-        <button className="pl-product-wish">
-          <Heart size={14} />
-        </button>
+
       </div>
       <div className="pl-product-info">
         <div className="pl-product-store">

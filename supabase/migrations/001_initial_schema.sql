@@ -272,7 +272,7 @@ CREATE TABLE reports (
 CREATE TABLE bank_accounts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   bank_name TEXT NOT NULL, -- 'BCA', 'BNI', 'BRI', 'Mandiri', 'GoPay', 'OVO', etc
-  account_number TEXT NOT NULL,
+  account_number TEXT UNIQUE NOT NULL,
   account_name TEXT NOT NULL,
   is_active BOOLEAN DEFAULT true,
   sort_order INT DEFAULT 0,

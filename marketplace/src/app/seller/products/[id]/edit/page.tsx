@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { CONDITIONS } from '@/lib/utils';
-import { ArrowLeft, Save, UploadCloud, X, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, UploadCloud, X, Loader2, Info, Box, Tag, FileText, DollarSign, Archive, Weight } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
@@ -32,7 +32,7 @@ export default function SellerEditProductPage() {
 
   useEffect(() => {
     if (!loading && !user) router.push('/auth/login');
-    if (!loading && user && !profile?.store) router.push('/seller/open-store');
+    if (!loading && user && (!profile?.store || (Array.isArray(profile.store) && profile.store.length === 0))) router.push('/seller/open-store');
   }, [user, loading, profile]);
 
   useEffect(() => {
@@ -54,13 +54,13 @@ export default function SellerEditProductPage() {
       
     if (error || !data) {
       toast.error('Produk tidak ditemukan');
-      router.push('/seller/products');
+      router.push('/seller/dashboard');
       return;
     }
     
-    // Authorization check
-    if (profile?.store?.id !== data.store_id) {
-       router.push('/seller/products');
+    const storeId = Array.isArray(profile?.store) ? profile.store[0]?.id : profile?.store?.id;
+    if (storeId !== data.store_id) {
+       router.push('/seller/dashboard');
        return;
     }
 
@@ -99,7 +99,7 @@ export default function SellerEditProductPage() {
       if (productError) throw productError;
 
       toast.success('Produk berhasil diperbarui! ✨');
-      router.push('/seller/products');
+      router.push('/seller/dashboard');
     } catch (err: any) {
       toast.error(err.message ?? 'Terjadi kesalahan saat menyimpan produk');
     } finally {
@@ -108,175 +108,277 @@ export default function SellerEditProductPage() {
   };
 
   if (loading || fetching) return (
-     <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
-        <div className="w-12 h-12 rounded-full border-4 border-violet-200 border-t-violet-600 animate-spin" />
-     </div>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FAFAFA' }}>
+      <div style={{ width: '40px', height: '40px', border: '4px solid #EDE9FE', borderTopColor: '#7C3AED', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+    </div>
   );
 
+  // 100% Matching Styles with Open Store Page
+  const inputStyle: React.CSSProperties = {
+    width: '100%', height: '48px',
+    paddingLeft: '46px', paddingRight: '16px',
+    borderRadius: '14px',
+    border: '1.5px solid #E5E7EB',
+    background: '#FAFAFA',
+    fontSize: '14px', fontWeight: 500,
+    color: '#111827', outline: 'none',
+    transition: 'border-color .2s ease, box-shadow .2s ease, background .2s ease',
+    fontFamily: 'inherit',
+    boxSizing: 'border-box',
+  };
+
+  const iconStyle: React.CSSProperties = {
+    position: 'absolute', left: '16px', top: '50%',
+    transform: 'translateY(-50%)',
+    color: '#9CA3AF', pointerEvents: 'none',
+    width: '18px', height: '18px',
+    transition: 'color .2s',
+  };
+
+  const labelStyle: React.CSSProperties = {
+    fontSize: '12px', fontWeight: 700,
+    color: '#6B7280', letterSpacing: '0.07em',
+    textTransform: 'uppercase', display: 'block',
+    marginBottom: '6px',
+  };
+
+  const onFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    e.target.style.borderColor = '#7C3AED';
+    e.target.style.background = '#fff';
+    e.target.style.boxShadow = '0 0 0 4px rgba(124,58,237,0.08)';
+  };
+  const onBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    e.target.style.borderColor = '#E5E7EB';
+    e.target.style.background = '#FAFAFA';
+    e.target.style.boxShadow = 'none';
+  };
+
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
-      <div className="max-w-3xl mx-auto py-8 px-4">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Link href="/seller/products" className="p-2 rounded-xl hover:bg-white border border-transparent hover:border-gray-200 transition-all">
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </Link>
-          <div>
-            <h1 className="section-title">Edit Produk</h1>
-            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Perbarui informasi produk jualanmu</p>
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+      padding: '32px 16px',
+      background: 'radial-gradient(ellipse at top left, #EDE9FE 0%, #F5F3FF 40%, #EFF6FF 100%)',
+    }}>
+      <div style={{ width: '100%', maxWidth: '640px' }}>
+
+        <Link 
+          href="/seller/dashboard" 
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#7C3AED', fontWeight: 700, textDecoration: 'none', marginBottom: '24px' }}
+        >
+          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+            <ArrowLeft size={18} />
+          </div>
+          Kembali ke Dashboard
+        </Link>
+
+        {/* Card */}
+        <div style={{
+          background: 'rgba(255,255,255,0.88)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          borderRadius: '24px',
+          border: '1px solid rgba(255,255,255,0.9)',
+          boxShadow: '0 32px 64px rgba(124,58,237,0.10), 0 8px 24px rgba(0,0,0,0.04)',
+          overflow: 'hidden',
+        }}>
+          {/* Top gradient bar */}
+          <div style={{ height: '4px', background: 'linear-gradient(90deg, #7C3AED, #A855F7, #EC4899)' }} />
+
+          <div style={{ padding: '36px 36px 32px' }}>
+            {/* Header */}
+            <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+              <div style={{
+                width: '72px', height: '72px', borderRadius: '50%',
+                background: 'linear-gradient(135deg, #EDE9FE, #F3E8FF)',
+                border: '2px dashed #C4B5FD',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 16px',
+              }}>
+                <Box size={24} color="#A78BFA" />
+              </div>
+              <h1 style={{ fontSize: '22px', fontWeight: 900, color: '#111827', margin: 0, letterSpacing: '-0.02em' }}>
+                Edit Produk
+              </h1>
+              <p style={{ fontSize: '14px', color: '#9CA3AF', marginTop: '6px' }}>
+                Perbarui informasi barang preloved Anda
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              
+              {/* Media Produk (Read-Only Demo) */}
+              <div>
+                <label style={labelStyle}>Foto Produk (Hanya Tampil)</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                  {existingImages.map((img, i) => (
+                    <div key={i} style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '14px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
+                      <img src={img.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      {i === 0 && (
+                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: '#7C3AED', color: '#fff', fontSize: '9px', fontWeight: 700, textAlign: 'center', padding: '2px 0' }}>
+                          Utama
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <p style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '8px' }}>*Untuk mengganti foto produk, harap hapus produk dan buat baru (untuk versi ini).</p>
+              </div>
+
+              {/* Nama Produk */}
+              <div>
+                <label style={labelStyle}>Nama Produk <span style={{ color: '#EF4444' }}>*</span></label>
+                <div style={{ position: 'relative' }}>
+                  <Tag style={iconStyle} size={18} />
+                  <input type="text" placeholder="Sepatu Converse Size 42"
+                    value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                    required style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+                </div>
+              </div>
+
+              {/* Kategori & Kondisi */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={labelStyle}>Kategori <span style={{ color: '#EF4444' }}>*</span></label>
+                  <div style={{ position: 'relative' }}>
+                    <Box style={iconStyle} size={18} />
+                    <select
+                      required
+                      value={form.category_id}
+                      onChange={e => setForm(f => ({ ...f, category_id: e.target.value }))}
+                      style={{ ...inputStyle, paddingRight: '36px', appearance: 'none', WebkitAppearance: 'none' }}
+                      onFocus={onFocus} onBlur={onBlur}
+                    >
+                      {categories.map(c => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                    {/* Select arrow */}
+                    <svg style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', width: '16px', height: '16px', color: '#9CA3AF' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+                <div>
+                  <label style={labelStyle}>Kondisi <span style={{ color: '#EF4444' }}>*</span></label>
+                  <div style={{ position: 'relative' }}>
+                    <Info style={iconStyle} size={18} />
+                    <select
+                      required
+                      value={form.condition}
+                      onChange={e => setForm(f => ({ ...f, condition: e.target.value }))}
+                      style={{ ...inputStyle, paddingRight: '36px', appearance: 'none', WebkitAppearance: 'none' }}
+                      onFocus={onFocus} onBlur={onBlur}
+                    >
+                      {Object.entries(CONDITIONS).map(([key, val]) => (
+                        <option key={key} value={key}>{val.label}</option>
+                      ))}
+                    </select>
+                    {/* Select arrow */}
+                    <svg style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', width: '16px', height: '16px', color: '#9CA3AF' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* Deskripsi */}
+              <div>
+                <label style={labelStyle}>Deskripsi Produk</label>
+                <div style={{ position: 'relative' }}>
+                  <FileText style={{ ...iconStyle, top: '16px', transform: 'none' }} size={18} />
+                  <textarea
+                    placeholder="Ceritakan detail produk..."
+                    value={form.description}
+                    onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                    rows={4}
+                    style={{
+                      width: '100%', padding: '12px 16px 12px 46px',
+                      borderRadius: '14px', border: '1.5px solid #E5E7EB',
+                      background: '#FAFAFA', fontSize: '14px', fontWeight: 500,
+                      color: '#111827', outline: 'none', resize: 'vertical',
+                      fontFamily: 'inherit', transition: 'all .2s', boxSizing: 'border-box',
+                    }}
+                    onFocus={onFocus} onBlur={onBlur}
+                  />
+                </div>
+              </div>
+
+              {/* Harga Jual & Beli */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={labelStyle}>Harga Jual <span style={{ color: '#EF4444' }}>*</span></label>
+                  <div style={{ position: 'relative' }}>
+                    <DollarSign style={iconStyle} size={18} />
+                    <input type="number" placeholder="50000" min="1000"
+                      value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
+                      required style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+                  </div>
+                </div>
+                <div>
+                  <label style={labelStyle}>Harga Awal</label>
+                  <div style={{ position: 'relative' }}>
+                    <DollarSign style={iconStyle} size={18} />
+                    <input type="number" placeholder="Opsional" min="0"
+                      value={form.original_price} onChange={e => setForm(f => ({ ...f, original_price: e.target.value }))}
+                      style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Stok & Berat */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={labelStyle}>Stok Barang <span style={{ color: '#EF4444' }}>*</span></label>
+                  <div style={{ position: 'relative' }}>
+                    <Archive style={iconStyle} size={18} />
+                    <input type="number" placeholder="1" min="1"
+                      value={form.stock} onChange={e => setForm(f => ({ ...f, stock: e.target.value }))}
+                      required style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+                  </div>
+                </div>
+                <div>
+                  <label style={labelStyle}>Berat (Gram) <span style={{ color: '#EF4444' }}>*</span></label>
+                  <div style={{ position: 'relative' }}>
+                    <Weight style={iconStyle} size={18} />
+                    <input type="number" placeholder="500" min="1"
+                      value={form.weight_gram} onChange={e => setForm(f => ({ ...f, weight_gram: e.target.value }))}
+                      required style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+                <button type="button" onClick={() => router.push('/seller/dashboard')}
+                  style={{
+                    flex: 1, height: '48px',
+                    background: 'transparent', color: '#6B7280',
+                    fontWeight: 600, fontSize: '14px',
+                    border: '1.5px solid #E5E7EB', borderRadius: '14px',
+                    cursor: 'pointer', transition: 'all .2s',
+                  }}>
+                  Batal
+                </button>
+                <button type="submit" disabled={saving}
+                  style={{
+                    flex: 2, height: '48px',
+                    background: saving ? '#A78BFA' : 'linear-gradient(135deg, #7C3AED 0%, #9333EA 100%)',
+                    color: '#fff', fontWeight: 700, fontSize: '15px',
+                    border: 'none', borderRadius: '14px',
+                    cursor: saving ? 'not-allowed' : 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                    boxShadow: '0 8px 24px rgba(124,58,237,0.30)',
+                    transition: 'all .2s',
+                  }}>
+                  {saving
+                    ? <span style={{ width: '20px', height: '20px', border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite', display: 'inline-block' }} />
+                    : <><span>Simpan Perubahan</span> <Save size={18} /></>
+                  }
+                </button>
+              </div>
+            </form>
           </div>
         </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-           {/* Photos Display (Read-only for simplicity in this demo, real app would allow add/remove) */}
-          <div className="card p-6">
-            <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-              <UploadCloud className="w-5 h-5 text-violet-600" /> Foto Produk 
-            </h3>
-            
-            <div className="flex flex-wrap gap-4">
-              {existingImages.map((img, i) => (
-                <div key={i} className="relative w-28 h-28 rounded-xl border border-gray-200 overflow-hidden">
-                  <img src={img.image_url} alt="" className="w-full h-full object-cover" />
-                  {i === 0 && (
-                    <div className="absolute bottom-0 inset-x-0 bg-violet-600 text-white text-[10px] font-bold text-center py-0.5">
-                      Utama
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-            <p className="text-xs text-gray-400 mt-3">*Untuk mengganti foto produk, silahkan hapus produk dan buat baru (untuk versi demo ini).</p>
-          </div>
-
-          {/* Info */}
-          <div className="card p-6 space-y-5">
-            <h3 className="font-bold text-lg mb-2">Informasi Produk</h3>
-            
-            <div>
-              <label className="block text-sm font-bold mb-2">Nama Produk <span className="text-red-500">*</span></label>
-              <input
-                type="text"
-                required
-                value={form.title}
-                onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                className="input-field"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold mb-2">Kategori <span className="text-red-500">*</span></label>
-              <select
-                required
-                value={form.category_id}
-                onChange={e => setForm(f => ({ ...f, category_id: e.target.value }))}
-                className="input-field bg-white"
-              >
-                {categories.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold mb-2">Kondisi Barang <span className="text-red-500">*</span></label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {Object.entries(CONDITIONS).map(([key, val]) => (
-                  <label key={key} className={`
-                    border-2 rounded-xl p-3 text-center cursor-pointer transition-all
-                    ${form.condition === key ? 'border-violet-600 bg-violet-50' : 'border-gray-200 hover:border-violet-300'}
-                  `}>
-                    <input type="radio" name="condition" value={key} checked={form.condition === key} onChange={e => setForm(f => ({ ...f, condition: e.target.value }))} className="hidden" />
-                    <span className="text-sm font-bold block">{val.label.split(' ')[1] || val.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold mb-2">Deskripsi Produk</label>
-              <textarea
-                value={form.description}
-                onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                rows={5}
-                className="input-field resize-none"
-              />
-            </div>
-          </div>
-
-          {/* Pricing & Stock */}
-          <div className="card p-6 space-y-5">
-            <h3 className="font-bold text-lg mb-2">Harga & Stok</h3>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm font-bold mb-2">Harga Jual <span className="text-red-500">*</span></label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Rp</span>
-                  <input
-                    type="number"
-                    required
-                    min="1000"
-                    value={form.price}
-                    onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
-                    className="input-field pl-12"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-bold mb-2">Harga Beli Awal (Opsional)</label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Rp</span>
-                  <input
-                    type="number"
-                    min="0"
-                    value={form.original_price}
-                    onChange={e => setForm(f => ({ ...f, original_price: e.target.value }))}
-                    className="input-field pl-12"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm font-bold mb-2">Stok <span className="text-red-500">*</span></label>
-                <input
-                  type="number"
-                  required
-                  min="0"
-                  value={form.stock}
-                  onChange={e => setForm(f => ({ ...f, stock: e.target.value }))}
-                  className="input-field"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold mb-2">Berat (Gram) <span className="text-red-500">*</span></label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    required
-                    min="1"
-                    value={form.weight_gram}
-                    onChange={e => setForm(f => ({ ...f, weight_gram: e.target.value }))}
-                    className="input-field pr-12"
-                  />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">gr</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-4">
-            <Link href="/seller/products" className="btn-secondary">
-              Batal
-            </Link>
-            <button type="submit" disabled={saving} className="btn-primary">
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
-            </button>
-          </div>
-        </form>
       </div>
     </div>
   );
