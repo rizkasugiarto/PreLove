@@ -224,18 +224,15 @@ export default function SearchPage() {
                 {products.map(product => {
                   const img = product.images?.find((i: any) => i.is_primary)?.image_url ?? product.images?.[0]?.image_url;
                   const cond = CONDITIONS[product.condition];
-                  const disc = product.original_price ? Math.round((1 - product.price / product.original_price) * 100) : null;
                   return (
                     <Link key={product.id} href={`/products/${product.id}`} className="pl-product-card group">
                       <div className="pl-product-img-wrap">
                         {img
                           ? <img src={img} alt={product.title} className="pl-product-img group-hover:scale-105 transition-transform duration-500" />
                           : <div className="pl-product-img-ph">📦</div>}
-                        {disc && <span className="pl-product-disc">-{disc}%</span>}
                         <span className={`pl-product-cond ${cond?.color ?? 'bg-gray-100 text-gray-600'}`}>
                           {cond?.label?.split(' ').slice(1).join(' ') ?? product.condition}
                         </span>
-
                       </div>
                       <div className="pl-product-info">
                         <div className="pl-product-store flex items-center gap-1.5">
@@ -253,7 +250,6 @@ export default function SearchPage() {
                         <div className="pl-product-footer">
                           <div>
                             <p className="pl-product-price">{formatPrice(product.price)}</p>
-                            {product.original_price && <p className="pl-product-orig">{formatPrice(product.original_price)}</p>}
                           </div>
                           {product.rating > 0 && (
                             <div className="pl-product-rating">

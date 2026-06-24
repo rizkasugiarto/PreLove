@@ -100,7 +100,6 @@ export default function HomePage() {
       .from('products')
       .select('*, store:stores(name), images:product_images(*)')
       .eq('is_active', true).gt('stock', 0)
-      .not('original_price', 'is', null)
       .order('created_at', { ascending: false }).limit(6);
     setFlashProducts(data ?? []);
   };
@@ -246,7 +245,6 @@ export default function HomePage() {
               ) : (
                 flashProducts.map(product => {
                   const img = product.images?.find((i: any) => i.is_primary)?.image_url ?? product.images?.[0]?.image_url;
-                  const disc = product.original_price ? Math.round((1 - product.price / product.original_price) * 100) : 0;
                   return (
                     <Link key={product.id} href={`/products/${product.id}`} className="pl-flash-card">
                       <div className="pl-flash-img-wrap">
@@ -254,11 +252,9 @@ export default function HomePage() {
                           ? <img src={img} alt={product.title} className="pl-flash-img" />
                           : <div className="pl-flash-img-ph">📦</div>
                         }
-                        {disc > 0 && <span className="pl-disc-badge">-{disc}%</span>}
                       </div>
                       <div className="pl-flash-name">{product.title}</div>
                       <div className="pl-flash-price">{formatPrice(product.price)}</div>
-                      {product.original_price && <div className="pl-flash-orig">{formatPrice(product.original_price)}</div>}
                       <div className="pl-flash-bar"><div className="pl-flash-bar-fill" style={{ width: '65%' }} /></div>
                     </Link>
                   );
@@ -394,11 +390,6 @@ function ProductCard({ product }: { product: any }) {
           ? <img src={img} alt={product.title} className="pl-product-img" />
           : <div className="pl-product-img-ph">📦</div>
         }
-        {product.original_price && (
-          <span className="pl-product-disc">
-            -{Math.round((1 - product.price / product.original_price) * 100)}%
-          </span>
-        )}
         {cond && (
           <span className="pl-product-cond" style={{
             background: cond.color === 'green' ? 'rgba(16,185,129,0.15)' :
@@ -420,9 +411,6 @@ function ProductCard({ product }: { product: any }) {
         <div className="pl-product-footer">
           <div>
             <div className="pl-product-price">{formatPrice(product.price)}</div>
-            {product.original_price && (
-              <div className="pl-product-orig">{formatPrice(product.original_price)}</div>
-            )}
           </div>
           {product.store?.rating && (
             <div className="pl-product-rating">

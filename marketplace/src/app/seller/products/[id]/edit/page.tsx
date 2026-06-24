@@ -20,7 +20,6 @@ export default function SellerEditProductPage() {
     title: '',
     description: '',
     price: '',
-    original_price: '',
     condition: 'good',
     category_id: '',
     stock: '1',
@@ -69,7 +68,6 @@ export default function SellerEditProductPage() {
       title: data.title,
       description: data.description || '',
       price: data.price.toString(),
-      original_price: data.original_price ? data.original_price.toString() : '',
       condition: data.condition,
       category_id: data.category_id,
       stock: data.stock.toString(),
@@ -90,7 +88,6 @@ export default function SellerEditProductPage() {
         title: form.title,
         description: form.description,
         price: parseInt(form.price),
-        original_price: form.original_price ? parseInt(form.original_price) : null,
         condition: form.condition,
         category_id: form.category_id,
         stock: parseInt(form.stock),
@@ -301,25 +298,14 @@ export default function SellerEditProductPage() {
                 </div>
               </div>
 
-              {/* Harga Jual & Beli */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
-                  <label style={labelStyle}>Harga Jual <span style={{ color: '#EF4444' }}>*</span></label>
-                  <div style={{ position: 'relative' }}>
-                    <DollarSign style={iconStyle} size={18} />
-                    <input type="number" placeholder="50000" min="1000"
-                      value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
-                      required style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
-                  </div>
-                </div>
-                <div>
-                  <label style={labelStyle}>Harga Awal</label>
-                  <div style={{ position: 'relative' }}>
-                    <DollarSign style={iconStyle} size={18} />
-                    <input type="number" placeholder="Opsional" min="0"
-                      value={form.original_price} onChange={e => setForm(f => ({ ...f, original_price: e.target.value }))}
-                      style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
-                  </div>
+              {/* Harga Jual */}
+              <div>
+                <label style={labelStyle}>Harga Jual <span style={{ color: '#EF4444' }}>*</span></label>
+                <div style={{ position: 'relative' }}>
+                  <DollarSign style={iconStyle} size={18} />
+                  <input type="number" placeholder="50000" min="1000"
+                    value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))}
+                    required style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
                 </div>
               </div>
 

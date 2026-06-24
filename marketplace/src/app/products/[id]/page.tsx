@@ -196,9 +196,30 @@ export default function ProductDetailPage() {
               
               {/* Title & Price Area */}
               <div>
-                <div className="flex items-center gap-2 flex-wrap mb-4">
-                  {product.category && <span style={{ background: 'linear-gradient(135deg, #F3E8FF, #E0E7FF)', color: '#6D28D9', padding: '6px 14px', borderRadius: '999px', fontSize: '11px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{product.category.name}</span>}
-                  <span className={cond?.color} style={{ padding: '6px 14px', borderRadius: '999px', fontSize: '11px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{cond?.label}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                  {product.category && (
+                    <span style={{
+                      background: 'linear-gradient(135deg, #F3E8FF, #EDE9FE)',
+                      color: '#6D28D9', padding: '5px 14px', borderRadius: '999px',
+                      fontSize: '12px', fontWeight: 800, letterSpacing: '0.04em',
+                      border: '1px solid rgba(109,40,217,0.12)', whiteSpace: 'nowrap',
+                    }}>
+                      🏷️ {product.category.name}
+                    </span>
+                  )}
+                  {cond && (
+                    <span style={{
+                      background: cond.color === 'green' ? 'rgba(16,185,129,0.1)'
+                        : cond.color === 'blue' ? 'rgba(59,130,246,0.1)' : 'rgba(245,158,11,0.1)',
+                      color: cond.color === 'green' ? '#059669'
+                        : cond.color === 'blue' ? '#2563EB' : '#D97706',
+                      padding: '5px 14px', borderRadius: '999px',
+                      fontSize: '12px', fontWeight: 800, whiteSpace: 'nowrap',
+                      border: `1px solid ${cond.color === 'green' ? 'rgba(16,185,129,0.2)' : cond.color === 'blue' ? 'rgba(59,130,246,0.2)' : 'rgba(245,158,11,0.2)'}`,
+                    }}>
+                      ✨ {cond.label}
+                    </span>
+                  )}
                 </div>
 
                 <h1 style={{ fontSize: '32px', fontWeight: 900, color: '#111827', lineHeight: 1.2, letterSpacing: '-0.02em', marginBottom: '16px' }}>{product.title}</h1>
@@ -207,14 +228,6 @@ export default function ProductDetailPage() {
                   <p style={{ fontSize: '42px', fontWeight: 900, background: 'linear-gradient(135deg, #7C3AED, #DB2777)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
                     {formatPrice(product.price)}
                   </p>
-                  {product.original_price && (
-                    <div className="flex items-center gap-3 mt-2">
-                      <p style={{ color: '#9CA3AF', textDecoration: 'line-through', fontSize: '15px', fontWeight: 700 }}>{formatPrice(product.original_price)}</p>
-                      <span style={{ background: '#FEE2E2', color: '#E11D48', padding: '4px 8px', borderRadius: '8px', fontSize: '11px', fontWeight: 900 }}>
-                        -{Math.round((1 - product.price / product.original_price) * 100)}%
-                      </span>
-                    </div>
-                  )}
                 </div>
               </div>
 
