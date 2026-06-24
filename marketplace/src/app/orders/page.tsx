@@ -144,20 +144,24 @@ export default function OrdersPage() {
                     </span>
                   </div>
 
-                  {/* Order Body */}
-                  <div style={{ padding: '20px', display: 'flex', gap: '16px', alignItems: 'center' }}>
-                    <div style={{ width: '80px', height: '80px', borderRadius: '16px', background: '#F3F4F6', overflow: 'hidden', flexShrink: 0, border: '1px solid rgba(0,0,0,0.05)' }}>
-                      {img ? <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px' }}>📦</div>}
+                  {/* Order Body (Clickable) */}
+                  <Link href={`/orders/${order.id}`} style={{ padding: '20px', display: 'flex', gap: '16px', alignItems: 'center', textDecoration: 'none' }} className="hover:bg-slate-50/50 transition-colors cursor-pointer group/body">
+                    <div className="relative w-[80px] h-[80px] rounded-[16px] bg-[#F3F4F6] overflow-hidden shrink-0 border border-black/5 group-hover/body:shadow-md transition-all">
+                      {img ? <img src={img} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[32px]">📦</div>}
+                      {/* Shopee-style hover overlay */}
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/body:opacity-100 transition-opacity duration-200">
+                        <span className="text-white text-[11px] font-bold bg-black/60 px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/20 shadow-sm">Lihat Detail</span>
+                      </div>
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontWeight: 800, color: '#1F2937', fontSize: '15px', margin: '0 0 4px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{snapshot?.title ?? 'Produk Preloved'}</p>
+                      <p style={{ fontWeight: 800, color: '#1F2937', fontSize: '15px', margin: '0 0 4px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} className="group-hover/body:text-purple-600 transition-colors">{snapshot?.title ?? 'Produk Preloved'}</p>
                       {order.items?.length > 1 && <p style={{ fontSize: '12px', color: '#8B5CF6', fontWeight: 700, margin: '0 0 4px 0' }}>+{order.items.length - 1} produk lainnya</p>}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#9CA3AF', fontSize: '12px', marginBottom: '8px' }}>
                         <Clock size={12} /> {formatDate(order.created_at)}
                       </div>
                       <p style={{ fontWeight: 900, color: '#7C3AED', fontSize: '16px', margin: 0 }}>{formatPrice(order.total)}</p>
                     </div>
-                  </div>
+                  </Link>
 
                   {/* Order Footer */}
                   <div style={{ padding: '16px 20px', borderTop: '1px solid rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.9)' }}>

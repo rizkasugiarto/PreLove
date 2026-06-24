@@ -1,27 +1,68 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { formatRelativeTime } from '@/lib/utils';
 import { MessageCircle, Search } from 'lucide-react';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 export default function ChatListPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [rooms, setRooms] = useState<any[]>([]);
   const [fetching, setFetching] = useState(true);
   const [search, setSearch] = useState('');
+
+  const storeId = searchParams.get('storeId');
+  const productId = searchParams.get('productId');
 
   useEffect(() => {
     if (!loading && !user) router.push('/auth/login');
   }, [user, loading]);
 
   useEffect(() => {
-    if (user) fetchRooms();
-  }, [user]);
+    if (user) {
+      if (storeId) {
+        handleDirectChat(storeId, productId);
+      } else {
+        fetchRooms();
+      }
+    }
+  }, [user, storeId, productId]);
+
+  const handleDirectChat = async (sId: string, pId: string | null) => {
+    // Cari room yang sudah ada (1 buyer hanya boleh punya 1 room per store)
+    const { data: existingRooms } = await supabase
+      .from('chat_rooms')
+      .select('id')
+      .eq('buyer_id', user!.id)
+      .eq('store_id', sId)
+      .order('created_at', { ascending: false });
+    
+    if (existingRooms && existingRooms.length > 0) {
+      router.replace(`/chat/${existingRooms[0].id}`);
+    } else {
+      const { data: newRoom, error } = await supabase.from('chat_rooms').insert({
+        buyer_id: user!.id,
+        store_id: sId,
+        product_id: pId || null,
+        last_message: '',
+        buyer_unread_count: 0,
+        seller_unread_count: 0
+      }).select().single();
+      
+      if (newRoom && !error) {
+        router.replace(`/chat/${newRoom.id}`);
+      } else {
+        toast.error('Gagal membuat obrolan baru: ' + (error?.message || 'Unknown error'));
+        fetchRooms();
+      }
+    }
+  };
 
   const fetchRooms = async () => {
     const { data } = await supabase

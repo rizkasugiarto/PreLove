@@ -13,11 +13,11 @@ export default function Footer() {
           <div>
             <h3 className="font-bold text-white mb-4 text-[15px]">PreLove</h3>
             <ul className="flex flex-col gap-3 text-[14px]">
-              <li><Link href="/about" className="hover:text-purple-400 transition-colors">Tentang PreLove</Link></li>
-              <li><Link href="#" className="hover:text-purple-400 transition-colors">Hak Kekayaan Intelektual</Link></li>
-              <li><Link href="#" className="hover:text-purple-400 transition-colors">Karir</Link></li>
-              <li><Link href="/blog" className="hover:text-purple-400 transition-colors">Blog</Link></li>
-              <li><Link href="/sustainability" className="hover:text-purple-400 transition-colors">Dampak Lingkungan</Link></li>
+              <li><Link href="/info/about" className="hover:text-purple-400 transition-colors">Tentang PreLove</Link></li>
+              <li><Link href="/info/hki" className="hover:text-purple-400 transition-colors">Hak Kekayaan Intelektual</Link></li>
+              <li><Link href="/info/karir" className="hover:text-purple-400 transition-colors">Karir</Link></li>
+              <li><Link href="/info/blog" className="hover:text-purple-400 transition-colors">Blog</Link></li>
+              <li><Link href="/info/sustainability" className="hover:text-purple-400 transition-colors">Dampak Lingkungan</Link></li>
             </ul>
           </div>
 
@@ -27,9 +27,9 @@ export default function Footer() {
           <div>
             <h3 className="font-bold text-white mb-4 text-[15px]">Bantuan dan Panduan</h3>
             <ul className="flex flex-col gap-3 text-[14px]">
-              <li><Link href="/faq" className="hover:text-purple-400 transition-colors">PreLove Care</Link></li>
-              <li><Link href="/terms" className="hover:text-purple-400 transition-colors">Syarat dan Ketentuan</Link></li>
-              <li><Link href="/privacy" className="hover:text-purple-400 transition-colors">Kebijakan Privasi</Link></li>
+              <li><Link href="/info/care" className="hover:text-purple-400 transition-colors">PreLove Care</Link></li>
+              <li><Link href="/info/terms" className="hover:text-purple-400 transition-colors">Syarat dan Ketentuan</Link></li>
+              <li><Link href="/info/privacy" className="hover:text-purple-400 transition-colors">Kebijakan Privasi</Link></li>
             </ul>
           </div>
 

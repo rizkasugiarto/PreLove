@@ -10,7 +10,7 @@ import { Plus, Package, ShoppingBag, Star, Pencil, Trash2, Check, X, Truck, Tren
 
 const ORDER_TABS = ['Semua', 'Pending', 'Dikonfirmasi', 'Dikemas', 'Dikirim', 'Selesai'];
 const TAB_STATUS: Record<string, string[]> = {
-  'Semua': [], 'Pending': ['pending'], 'Dikonfirmasi': ['confirmed'],
+  'Semua': [], 'Pending': ['pending', 'waiting_payment'], 'Dikonfirmasi': ['confirmed'],
   'Dikemas': ['packed'], 'Dikirim': ['shipped'], 'Selesai': ['delivered', 'completed'],
 };
 
@@ -120,7 +120,7 @@ export default function SellerDashboardPage() {
     </div>
   );
 
-  const pendingOrdersCount = allOrders.filter(o => o.status === 'pending').length;
+  const pendingOrdersCount = allOrders.filter(o => o.status === 'pending' || o.status === 'waiting_payment').length;
 
   return (
     <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at top left, #EDE9FE 0%, #F5F3FF 40%, #EFF6FF 100%)', color: '#111827', padding: '32px 16px' }}>
@@ -283,14 +283,14 @@ export default function SellerDashboardPage() {
                           </div>
                           
                           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            {order.status === 'pending' && <>
+                            {(order.status === 'pending' || order.status === 'waiting_payment') && <>
                               <ActionBtn variant="outline" label="Tolak Pesanan" onClick={() => updateOrderStatus(order.id, 'cancelled')} />
                               <ActionBtn variant="primary" label="Terima Pesanan" onClick={() => updateOrderStatus(order.id, 'confirmed')} />
                             </>}
                             {order.status === 'confirmed' && <ActionBtn variant="primary" label="Tandai Dikemas" onClick={() => updateOrderStatus(order.id, 'packed')} />}
                             {order.status === 'packed' && <ActionBtn variant="primary" label="Input Resi" onClick={() => { setResiModal({ orderId: order.id, open: true }); setResiInput(''); }} />}
                             {(order.status === 'shipped' || order.status === 'delivered' || order.status === 'completed' || order.status === 'cancelled') && (
-                                <button style={{ background: 'none', border: 'none', color: '#7C3AED', fontSize: '14px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>Detail <ExternalLink size={14}/></button>
+                                <button onClick={() => router.push(`/seller/orders/${order.id}`)} style={{ background: 'none', border: 'none', color: '#7C3AED', fontSize: '14px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>Detail <ExternalLink size={14}/></button>
                             )}
                           </div>
                         </div>
@@ -367,6 +367,7 @@ function StatCard({ icon, title, value, bg, highlight }: { icon: any, title: str
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string, bg: string, color: string }> = {
+    'waiting_payment': { label: 'Menunggu Pembayaran', bg: '#FEF3C7', color: '#B45309' },
     'pending': { label: 'Perlu Konfirmasi', bg: '#FFFBEB', color: '#B45309' },
     'confirmed': { label: 'Perlu Dikemas', bg: '#EFF6FF', color: '#1D4ED8' },
     'packed': { label: 'Siap Kirim', bg: '#F5F3FF', color: '#6D28D9' },

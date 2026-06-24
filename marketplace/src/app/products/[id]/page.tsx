@@ -94,15 +94,15 @@ export default function ProductDetailPage() {
         <div className="absolute top-[10%] -right-[10%] w-[40%] h-[60%] rounded-full blur-[100px] bg-emerald-200/40 mix-blend-multiply" />
       </div>
 
-      <div className="max-w-[1200px] mx-auto px-4 lg:px-8 relative z-10">
+      <div className="max-w-5xl mx-auto px-8 lg:px-12 relative z-10">
         <button onClick={() => router.back()} className="flex items-center gap-2 text-slate-500 hover:text-purple-600 mb-8 font-bold text-sm transition-transform hover:-translate-x-1 w-fit">
           <ChevronLeft className="w-5 h-5" /> Kembali
         </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start relative">
           
           {/* LEFT COLUMN: Images, Description, Reviews */}
-          <div className="lg:col-span-5 flex flex-col gap-8">
+          <div className="flex flex-col gap-8">
             
             {/* Images Card */}
             <div className="flex flex-col gap-4">
@@ -194,7 +194,7 @@ export default function ProductDetailPage() {
           </div>
 
           {/* RIGHT COLUMN: Info Card (Sticky) */}
-          <div className="lg:col-span-7 sticky top-28 h-fit">
+          <div className="sticky top-28 h-fit">
             <div style={{
               background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
               borderRadius: '32px', border: '1px solid rgba(255,255,255,0.9)',

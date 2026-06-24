@@ -157,13 +157,20 @@ export default function CheckoutPage() {
         
         lastOrderId = orderId;
         
-        await supabase.from('orders').update({
+        let updateData: any = {
            payment_bank: selectedBank.bank_name,
            payment_account_number: selectedBank.account_number,
            payment_account_name: selectedBank.account_name,
            address_snapshot: address,
            notes: notes
-        }).eq('id', orderId);
+        };
+        
+        if (selectedBank.bank_name === 'COD') {
+           updateData.status = 'pending';
+           updateData.payment_status = 'verified'; // or whatever represents cod payment
+        }
+
+        await supabase.from('orders').update(updateData).eq('id', orderId);
       }
 
       await supabase.from('cart_items').delete().in('id', cartItems.map(c => c.id));

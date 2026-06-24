@@ -5,12 +5,11 @@ import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { formatPrice, formatDate, ORDER_STATUS } from '@/lib/utils';
-import { ArrowLeft, MapPin, Store, CreditCard, MessageCircle, Clock } from 'lucide-react';
+import { ArrowLeft, MapPin, User, CreditCard, Clock, Truck } from 'lucide-react';
 import Link from 'next/link';
-import toast from 'react-hot-toast';
 
-export default function OrderDetailPage() {
-  const { user, loading } = useAuth();
+export default function SellerOrderDetailPage() {
+  const { user, profile, loading } = useAuth();
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
   
@@ -22,29 +21,19 @@ export default function OrderDetailPage() {
   }, [user, loading]);
 
   useEffect(() => {
-    if (user && id) fetchOrder();
-  }, [user, id]);
+    if (user && id && profile?.store) fetchOrder(profile.store.id || profile.store[0]?.id);
+  }, [user, id, profile]);
 
-  const fetchOrder = async () => {
+  const fetchOrder = async (storeId: string) => {
     const { data } = await supabase
       .from('orders')
-      .select('*, store:stores(id,name,logo_url), items:order_items(*, product:products(id,title,images:product_images(image_url))), reviews(*)')
+      .select('*, buyer:profiles(full_name, phone), items:order_items(*, product:products(id,title,images:product_images(image_url)))')
       .eq('id', id)
+      .eq('store_id', storeId)
       .single();
     
     setOrder(data);
     setFetching(false);
-  };
-
-  const confirmDelivery = async () => {
-    if (!confirm('Apakah kamu sudah menerima barang dengan baik?')) return;
-    const { error } = await supabase.from('orders').update({ status: 'delivered' }).eq('id', id);
-    if (error) {
-      toast.error('Gagal konfirmasi penerimaan');
-    } else {
-      toast.success('Pesanan selesai! Silakan beri ulasan ⭐');
-      fetchOrder();
-    }
   };
 
   if (loading || fetching) return (
@@ -67,7 +56,6 @@ export default function OrderDetailPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at top left, #EDE9FE 0%, #F5F3FF 40%, #EFF6FF 100%)', color: '#111827', paddingBottom: '128px', paddingTop: '112px', position: 'relative' }}>
-      {/* Aurora Blobs */}
       <div className="absolute top-0 left-0 w-full h-[500px] overflow-hidden pointer-events-none">
         <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[80%] rounded-full blur-[120px] bg-purple-300/40 mix-blend-multiply" />
         <div className="absolute top-[10%] -right-[10%] w-[40%] h-[60%] rounded-full blur-[100px] bg-emerald-200/40 mix-blend-multiply" />
@@ -77,12 +65,12 @@ export default function OrderDetailPage() {
         
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
-          <Link href="/orders" style={{
+          <button onClick={() => router.back()} style={{
             width: '44px', height: '44px', borderRadius: '16px', background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(10px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', flexShrink: 0
+            display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', flexShrink: 0, cursor: 'pointer'
           }} className="hover:bg-white hover:scale-105 transition-all">
             <ArrowLeft size={20} color="#374151" />
-          </Link>
+          </button>
           <div style={{ minWidth: 0 }}>
             <h1 style={{ fontSize: '28px', fontWeight: 900, margin: '0 0 4px 0', letterSpacing: '-0.5px', color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Detail Pesanan</h1>
             <p style={{ fontSize: '14px', color: '#6B7280', margin: 0, fontWeight: 600 }}>{order.order_number}</p>
@@ -106,8 +94,8 @@ export default function OrderDetailPage() {
                 </span>
               </div>
               {order.tracking_number && (
-                <p style={{ fontSize: '13px', color: '#4B5563', margin: '12px 0 0 0', fontWeight: 600 }}>
-                  Resi: <span style={{ fontWeight: 800, color: '#7C3AED' }}>{order.tracking_number}</span>
+                <p style={{ fontSize: '13px', color: '#4B5563', margin: '12px 0 0 0', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Truck size={14} color="#0E7490" /> Resi: <span style={{ fontWeight: 800, color: '#0E7490' }}>{order.tracking_number}</span>
                 </p>
               )}
             </div>
@@ -119,58 +107,15 @@ export default function OrderDetailPage() {
             </div>
           </div>
 
-          {/* Action Callouts */}
-          {order.status === 'waiting_payment' && order.payment_bank !== 'COD' && (
-             <div style={{ background: 'linear-gradient(135deg, #FFFBEB, #FEF3C7)', borderRadius: '24px', padding: '24px 32px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px', border: '1px solid #FDE68A' }}>
-               <div>
-                 <h3 style={{ fontSize: '16px', fontWeight: 900, color: '#D97706', margin: '0 0 4px 0' }}>Selesaikan Pembayaran</h3>
-                 <p style={{ fontSize: '13px', color: '#B45309', margin: 0, fontWeight: 500 }}>Segera bayar dan unggah bukti transfer agar pesanan bisa diproses.</p>
-               </div>
-               <Link href={`/orders/${order.id}/payment`} style={{ background: '#D97706', color: 'white', fontWeight: 800, padding: '12px 24px', borderRadius: '16px', textDecoration: 'none', whiteSpace: 'nowrap', boxShadow: '0 8px 16px rgba(217,119,6,0.2)' }} className="hover:scale-105 transition-transform w-full sm:w-auto text-center">
-                 Bayar Sekarang
-               </Link>
-             </div>
-          )}
-
-          {order.status === 'shipped' && (
-             <div style={{ background: 'linear-gradient(135deg, #ECFDF5, #D1FAE5)', borderRadius: '24px', padding: '24px 32px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px', border: '1px solid #A7F3D0' }}>
-               <div>
-                 <h3 style={{ fontSize: '16px', fontWeight: 900, color: '#059669', margin: '0 0 4px 0' }}>Barang Sudah Diterima?</h3>
-                 <p style={{ fontSize: '13px', color: '#047857', margin: 0, fontWeight: 500 }}>Pastikan kondisi barang sudah sesuai sebelum konfirmasi penerimaan.</p>
-               </div>
-               <button onClick={confirmDelivery} style={{ background: '#10B981', color: 'white', fontWeight: 800, padding: '12px 24px', borderRadius: '16px', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', boxShadow: '0 8px 16px rgba(16,185,129,0.2)' }} className="hover:scale-105 transition-transform w-full sm:w-auto">
-                 ✅ Ya, Barang Diterima
-               </button>
-             </div>
-          )}
-
-          {order.status === 'completed' && order.reviews?.length === 0 && (
-             <div style={{ background: 'linear-gradient(135deg, #EFF6FF, #DBEAFE)', borderRadius: '24px', padding: '24px 32px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px', border: '1px solid #BFDBFE' }}>
-               <div>
-                 <h3 style={{ fontSize: '16px', fontWeight: 900, color: '#2563EB', margin: '0 0 4px 0' }}>Beri Ulasan Produk</h3>
-                 <p style={{ fontSize: '13px', color: '#1D4ED8', margin: 0, fontWeight: 500 }}>Bantu penjual dan pembeli lain dengan memberikan ulasan terbaikmu!</p>
-               </div>
-               <Link href={`/review/${order.id}`} style={{ background: '#3B82F6', color: 'white', fontWeight: 800, padding: '12px 24px', borderRadius: '16px', textDecoration: 'none', whiteSpace: 'nowrap', boxShadow: '0 8px 16px rgba(59,130,246,0.2)' }} className="hover:scale-105 transition-transform w-full sm:w-auto text-center">
-                 ⭐ Beri Ulasan
-               </Link>
-             </div>
-          )}
-
           {/* Product Items */}
           <div style={{
             background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
             borderRadius: '24px', border: '1px solid rgba(255,255,255,0.9)',
             boxShadow: '0 4px 20px rgba(124,58,237,0.03)', overflow: 'hidden'
           }}>
-            {/* Store Header */}
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(0,0,0,0.04)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px', background: 'rgba(249,250,251,0.5)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Store size={18} color="#8B5CF6" />
-                <span style={{ fontSize: '15px', fontWeight: 900, color: '#374151' }}>{order.store?.name}</span>
-              </div>
-              <button style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'white', border: '1px solid #E5E7EB', padding: '6px 14px', borderRadius: '999px', fontSize: '13px', fontWeight: 800, color: '#6B7280', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }} className="hover:border-purple-300 hover:text-purple-600 transition-colors">
-                <MessageCircle size={14} /> Chat Penjual
-              </button>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(0,0,0,0.04)', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px', background: 'rgba(249,250,251,0.5)' }}>
+              <User size={18} color="#8B5CF6" />
+              <span style={{ fontSize: '15px', fontWeight: 900, color: '#374151' }}>Pembeli: {order.buyer?.full_name}</span>
             </div>
 
             <div style={{ padding: '8px 24px' }}>
@@ -182,11 +127,9 @@ export default function OrderDetailPage() {
                       {img ? <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>📦</div>}
                     </div>
                     <div style={{ flex: 1, minWidth: '200px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                      <Link href={`/products/${item.product_id}`} style={{ textDecoration: 'none' }} className="hover:underline hover:text-purple-600 decoration-purple-600">
-                        <h4 style={{ fontWeight: 800, color: '#1F2937', fontSize: '15px', margin: '0 0 4px 0', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                          {item.product_snapshot?.title || item.product?.title}
-                        </h4>
-                      </Link>
+                      <h4 style={{ fontWeight: 800, color: '#1F2937', fontSize: '15px', margin: '0 0 4px 0', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {item.product_snapshot?.title || item.product?.title}
+                      </h4>
                       <p style={{ fontSize: '13px', color: '#6B7280', margin: 0, fontWeight: 600 }}>{item.quantity} x {formatPrice(item.price)}</p>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', width: '100%', sm: {width: 'auto'}, justifyContent: 'flex-end' }} className="sm:w-auto w-full">
@@ -210,7 +153,7 @@ export default function OrderDetailPage() {
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div>
-                  <p style={{ fontSize: '12px', color: '#9CA3AF', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 4px 0' }}>Kurir Pengiriman</p>
+                  <p style={{ fontSize: '12px', color: '#9CA3AF', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 4px 0' }}>Kurir Pilihan Pembeli</p>
                   <p style={{ fontSize: '14px', fontWeight: 800, color: '#374151', margin: 0 }}>{order.shipping_courier} - Reguler</p>
                 </div>
                 <div>
@@ -232,7 +175,7 @@ export default function OrderDetailPage() {
               boxShadow: '0 4px 20px rgba(124,58,237,0.03)', padding: '24px', display: 'flex', flexDirection: 'column'
             }}>
               <h3 style={{ fontSize: '15px', fontWeight: 900, color: '#111827', margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <CreditCard size={18} color="#8B5CF6" /> Rincian Pembayaran
+                <CreditCard size={18} color="#8B5CF6" /> Rincian Transaksi
               </h3>
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
@@ -247,13 +190,13 @@ export default function OrderDetailPage() {
                   <span style={{ fontSize: '14px', fontWeight: 800, color: '#374151' }}>{formatPrice(order.subtotal)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '13px', color: '#6B7280', fontWeight: 600 }}>Ongkos Kirim</span>
+                  <span style={{ fontSize: '13px', color: '#6B7280', fontWeight: 600 }}>Ongkos Kirim Diterima</span>
                   <span style={{ fontSize: '14px', fontWeight: 800, color: '#374151' }}>{formatPrice(order.shipping_cost)}</span>
                 </div>
               </div>
               
               <div style={{ paddingTop: '16px', marginTop: '16px', borderTop: '2px dashed rgba(0,0,0,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '14px', fontWeight: 900, color: '#111827' }}>Total Belanja</span>
+                <span style={{ fontSize: '14px', fontWeight: 900, color: '#111827' }}>Total Pendapatan</span>
                 <span style={{ fontSize: '20px', fontWeight: 900, background: 'linear-gradient(135deg, #7C3AED, #DB2777)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{formatPrice(order.total)}</span>
               </div>
             </div>
