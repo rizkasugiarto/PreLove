@@ -7,6 +7,8 @@ import { useAuth } from '@/context/AuthContext';
 import { formatPrice, CONDITIONS, formatRelativeTime } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import { ShoppingCart, MessageCircle, Star, Store, ChevronLeft, ChevronRight, Shield, Package, ShieldCheck } from 'lucide-react';
+import BackButton from '@/components/BackButton';
+import LogoLoader from '@/components/LogoLoader';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -68,18 +70,7 @@ export default function ProductDetailPage() {
     router.push(`/chat?storeId=${product.store_id}&productId=${id}`);
   };
 
-  if (loading) return (
-    <div className="max-w-6xl mx-auto px-4 py-10">
-      <div className="animate-pulse grid grid-cols-1 md:grid-cols-2 gap-10">
-        <div className="aspect-square bg-gray-200 rounded-3xl" />
-        <div className="space-y-4">
-          <div className="h-8 bg-gray-200 rounded-xl w-3/4" />
-          <div className="h-6 bg-gray-200 rounded-xl w-1/2" />
-          <div className="h-10 bg-gray-200 rounded-xl w-1/3" />
-        </div>
-      </div>
-    </div>
-  );
+  if (loading) return <LogoLoader text="Memuat Produk..." />;
 
   if (!product) return <div className="text-center py-20 text-gray-500">Produk tidak ditemukan</div>;
 
@@ -94,44 +85,45 @@ export default function ProductDetailPage() {
         <div className="absolute top-[10%] -right-[10%] w-[40%] h-[60%] rounded-full blur-[100px] bg-emerald-200/40 mix-blend-multiply" />
       </div>
 
-      <div className="max-w-5xl mx-auto px-8 lg:px-12 relative z-10">
-        <button onClick={() => router.back()} className="flex items-center gap-2 text-slate-500 hover:text-purple-600 mb-8 font-bold text-sm transition-transform hover:-translate-x-1 w-fit">
-          <ChevronLeft className="w-5 h-5" /> Kembali
-        </button>
+      <div style={{ width: '100%', maxWidth: '1024px', margin: '0 auto' }} className="px-8 lg:px-12 relative z-10">
+        <BackButton />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start relative">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start relative">
           
           {/* LEFT COLUMN: Images, Description, Reviews */}
           <div className="flex flex-col gap-8">
             
             {/* Images Card */}
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3">
               <div style={{
                 background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
-                borderRadius: '32px', border: '1px solid rgba(255,255,255,0.8)',
+                borderRadius: '24px', border: '1px solid rgba(255,255,255,0.8)',
                 boxShadow: '0 20px 40px rgba(124,58,237,0.05)', overflow: 'hidden',
-                aspectRatio: '1/1', position: 'relative'
+                width: '100%',
+                aspectRatio: '1 / 1',
+                maxHeight: '480px',
+                position: 'relative',
               }}>
                 {images.length > 0 ? (
-                  <img src={images[activeImg]?.image_url} alt={product.title} className="w-full h-full object-cover transition-transform duration-700 hover:scale-110" />
+                  <img src={images[activeImg]?.image_url} alt={product.title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.7s ease', display: 'block' }} className="hover:scale-105" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-8xl">📦</div>
                 )}
               </div>
               
               {images.length > 1 && (
-                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide px-1">
+                <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px', paddingLeft: '2px', paddingRight: '2px' }} className="scrollbar-hide">
                   {images.map((img: any, idx: number) => (
                     <button key={idx} onClick={() => setActiveImg(idx)}
                       style={{
-                        width: '80px', height: '80px', flexShrink: 0, borderRadius: '20px', overflow: 'hidden',
-                        border: activeImg === idx ? '3px solid #8B5CF6' : '3px solid transparent',
-                        boxShadow: activeImg === idx ? '0 8px 16px rgba(139,92,246,0.2)' : '0 4px 12px rgba(0,0,0,0.05)',
-                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', opacity: activeImg === idx ? 1 : 0.7,
-                        transform: activeImg === idx ? 'scale(1.05)' : 'scale(1)'
+                        width: '72px', height: '72px', flexShrink: 0, borderRadius: '16px', overflow: 'hidden',
+                        border: activeImg === idx ? '2.5px solid #8B5CF6' : '2.5px solid transparent',
+                        boxShadow: activeImg === idx ? '0 4px 12px rgba(139,92,246,0.25)' : '0 2px 8px rgba(0,0,0,0.06)',
+                        transition: 'all 0.25s ease', opacity: activeImg === idx ? 1 : 0.6,
+                        background: 'none', cursor: 'pointer', padding: 0,
                       }}
                       className="hover:opacity-100">
-                      <img src={img.image_url} alt="" className="w-full h-full object-cover" />
+                      <img src={img.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                     </button>
                   ))}
                 </div>

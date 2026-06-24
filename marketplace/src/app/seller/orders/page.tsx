@@ -8,6 +8,7 @@ import { formatPrice, formatDate, ORDER_STATUS } from '@/lib/utils';
 import { Package, Search, ChevronRight, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import LogoLoader from '@/components/LogoLoader';
 
 export default function SellerOrdersPage() {
   const { user, profile, loading } = useAuth();
@@ -64,11 +65,7 @@ export default function SellerOrdersPage() {
     return matchSearch && matchTab;
   });
 
-  if (loading || fetching) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
-      <div className="w-12 h-12 rounded-full border-4 border-violet-200 border-t-violet-600 animate-spin" />
-    </div>
-  );
+  if (loading || fetching) return <LogoLoader text="Memuat Pesanan..." />;
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>

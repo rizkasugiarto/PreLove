@@ -64,7 +64,7 @@ export default function Navbar() {
   return (
     <header style={navStyle}>
       {/* ══════ ROW 1: Main Nav Bar ══════ */}
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 20px' }}>
+      <div style={{ width: '100%', maxWidth: '1280px', margin: '0 auto', padding: '0 20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', height: '64px', justifyContent: 'space-between', width: '100%' }}>
 
           {/* ── Logo ── */}

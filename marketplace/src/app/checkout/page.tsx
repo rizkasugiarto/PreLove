@@ -111,8 +111,24 @@ export default function CheckoutPage() {
   const availableCities = address.province ? Object.keys(REGIONS[address.province] || {}) : [];
   const availableSubdistricts = address.province && address.city ? (REGIONS[address.province]?.[address.city] || []) : [];
 
+  let totalShippingCost = 0;
+  Object.keys(byStore).forEach(storeId => {
+    const store = byStore[storeId][0]?.product?.store;
+    if (store && address.province && address.city) {
+      if (store.city === address.city && store.province === address.province) {
+        totalShippingCost += 10000;
+      } else if (store.province === address.province) {
+        totalShippingCost += 15000;
+      } else {
+        totalShippingCost += 25000;
+      }
+    } else {
+      totalShippingCost += address.province ? 15000 : 0;
+    }
+  });
+
   const storeCount = Object.keys(byStore).length || 1;
-  const shippingCost = 15000 * storeCount;
+  const shippingCost = selectedCourier === 'COD' ? 0 : totalShippingCost;
   const total = subtotal + shippingCost;
 
   const handleOrder = async () => {
@@ -134,6 +150,22 @@ export default function CheckoutPage() {
       for (const [storeId, storeItems] of Object.entries(byStore)) {
         const storeSub = storeItems.reduce((s, i) => s + i.product.price * i.quantity, 0);
         
+        const store = storeItems[0]?.product?.store;
+        let storeShippingCost = 0;
+        if (selectedCourier !== 'COD') {
+          if (store && address.province && address.city) {
+            if (store.city === address.city && store.province === address.province) {
+              storeShippingCost = 10000;
+            } else if (store.province === address.province) {
+              storeShippingCost = 15000;
+            } else {
+              storeShippingCost = 25000;
+            }
+          } else {
+            storeShippingCost = address.province ? 15000 : 0;
+          }
+        }
+        
         const itemsJson = storeItems.map(ci => ({
           product_id: ci.product_id,
           quantity: ci.quantity,
@@ -146,8 +178,8 @@ export default function CheckoutPage() {
           p_store_id: storeId,
           p_shipping_address: JSON.stringify({ ...address, is_dropship: isDropship, dropshipper_name: dropshipInfo.name, dropshipper_phone: dropshipInfo.phone }),
           p_shipping_method: selectedCourier,
-          p_shipping_cost: shippingCost,
-          p_total: storeSub + shippingCost,
+          p_shipping_cost: storeShippingCost,
+          p_total: storeSub + storeShippingCost,
           p_items: itemsJson
         });
 
@@ -195,7 +227,7 @@ export default function CheckoutPage() {
         <div className="absolute top-[10%] -right-[10%] w-[40%] h-[60%] rounded-full blur-[100px] bg-emerald-200/40 mix-blend-multiply" />
       </div>
 
-      <div className="max-w-[1200px] mx-auto px-4 lg:px-8 relative z-10">
+      <div style={{ width: '100%', maxWidth: '1200px', margin: '0 auto' }} className="px-4 lg:px-8 relative z-10">
         <h1 style={{ fontSize: '36px', fontWeight: 900, color: '#111827', marginBottom: '40px', display: 'flex', alignItems: 'center', gap: '16px', letterSpacing: '-0.02em' }}>
           <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', border: '1px solid rgba(255,255,255,0.8)', boxShadow: '0 8px 16px rgba(124,58,237,0.05)' }}>📦</div>
           Checkout
@@ -386,11 +418,33 @@ export default function CheckoutPage() {
               </h2>
               
               <div style={{ maxHeight: '40vh', overflowY: 'auto', paddingRight: '8px', display: 'flex', flexDirection: 'column', gap: '16px' }} className="scrollbar-hide">
-                {Object.entries(byStore).map(([storeId, items]) => (
+                {Object.entries(byStore).map(([storeId, items]) => {
+                  const store = items[0]?.product?.store;
+                  let storeShippingCost = 0;
+                  if (selectedCourier !== 'COD') {
+                    if (store && address.province && address.city) {
+                      if (store.city === address.city && store.province === address.province) {
+                        storeShippingCost = 10000;
+                      } else if (store.province === address.province) {
+                        storeShippingCost = 15000;
+                      } else {
+                        storeShippingCost = 25000;
+                      }
+                    } else {
+                      storeShippingCost = address.province ? 15000 : 0;
+                    }
+                  }
+                  
+                  return (
                   <div key={storeId}>
-                    <p style={{ fontSize: '11px', fontWeight: 900, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      🏪 {items[0]?.product?.store?.name}
-                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <p style={{ fontSize: '11px', fontWeight: 900, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        🏪 {store?.name}
+                      </p>
+                      <span style={{ fontSize: '10px', fontWeight: 800, color: '#10B981', background: '#D1FAE5', padding: '2px 6px', borderRadius: '4px' }}>
+                        Ongkir: {selectedCourier === 'COD' ? 'GRATIS' : formatPrice(storeShippingCost)}
+                      </span>
+                    </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       {items.map(ci => {
                         const img = ci.product?.images?.find((i: any) => i.is_primary)?.image_url ?? ci.product?.images?.[0]?.image_url;
@@ -408,7 +462,7 @@ export default function CheckoutPage() {
                       })}
                     </div>
                   </div>
-                ))}
+                )})}
               </div>
 
               <div style={{ paddingTop: '20px', borderTop: '2px dashed rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -419,7 +473,7 @@ export default function CheckoutPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '14px', fontWeight: 600, color: '#6B7280' }}>Ongkir ({selectedCourier})</span>
                   <span style={{ fontSize: '12px', fontWeight: 800, color: '#10B981', background: '#D1FAE5', padding: '4px 10px', borderRadius: '8px' }}>
-                    {selectedCourier === 'COD' ? 'GRATIS' : `${formatPrice(shippingCost)} (${storeCount} Toko)`}
+                    {selectedCourier === 'COD' ? 'GRATIS' : `${formatPrice(shippingCost)}`}
                   </span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', paddingTop: '12px', marginTop: '4px', borderTop: '2px dashed rgba(0,0,0,0.06)' }}>

@@ -8,6 +8,7 @@ import { CONDITIONS } from '@/lib/utils';
 import { ArrowLeft, Save, X, Camera, Box, Tag, FileText, DollarSign, Archive, Weight, Info } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import LogoLoader from '@/components/LogoLoader';
 
 export default function SellerAddProductPage() {
   const { user, profile, loading } = useAuth();
@@ -126,7 +127,7 @@ export default function SellerAddProductPage() {
     }
   };
 
-  if (loading) return null;
+  if (loading) return <LogoLoader text="Menyiapkan Form..." />;
 
   // 100% Matching Styles with Open Store Page
   const inputStyle: React.CSSProperties = {

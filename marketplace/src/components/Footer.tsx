@@ -1,87 +1,155 @@
 import Link from 'next/link';
-import { ShieldCheck, Camera, Hash, Mail, ArrowRight, ShoppingBag, MessageCircle, Video } from 'lucide-react';
+import { ShieldCheck, Camera, Hash, ShoppingBag, MessageCircle, Video } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0A0514] border-t border-white/10 pt-16 pb-8 mt-auto text-white/80 overflow-hidden">
-      <div className="max-w-[1200px] mx-auto px-6 lg:px-8">
-        
-        {/* Main Columns - Tokopedia Style */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-          
-          {/* Kolom 1: Tentang PreLove */}
+    <footer style={{
+      background: 'linear-gradient(180deg, #0D0520 0%, #080112 100%)',
+      borderTop: '1px solid rgba(139,92,246,0.15)',
+      paddingTop: '64px',
+      paddingBottom: '32px',
+      marginTop: 'auto',
+      color: 'rgba(255,255,255,0.65)',
+    }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+
+        {/* Brand + tagline */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '48px' }}>
+          <div style={{
+            width: '42px', height: '42px', borderRadius: '14px',
+            background: 'linear-gradient(135deg, #7C3AED, #DB2777)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 8px 20px rgba(124,58,237,0.35)',
+          }}>
+            <ShoppingBag size={22} color="white" />
+          </div>
           <div>
-            <h3 className="font-bold text-white mb-4 text-[15px]">PreLove</h3>
-            <ul className="flex flex-col gap-3 text-[14px]">
-              <li><Link href="/info/about" className="hover:text-purple-400 transition-colors">Tentang PreLove</Link></li>
-              <li><Link href="/info/hki" className="hover:text-purple-400 transition-colors">Hak Kekayaan Intelektual</Link></li>
-              <li><Link href="/info/karir" className="hover:text-purple-400 transition-colors">Karir</Link></li>
-              <li><Link href="/info/blog" className="hover:text-purple-400 transition-colors">Blog</Link></li>
-              <li><Link href="/info/sustainability" className="hover:text-purple-400 transition-colors">Dampak Lingkungan</Link></li>
+            <span style={{ fontWeight: 900, fontSize: '20px', color: 'white', letterSpacing: '-0.5px' }}>PreLove</span>
+            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: 0, fontWeight: 500 }}>Platform Preloved Terpercaya</p>
+          </div>
+        </div>
+
+        {/* Grid Links */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+          gap: '40px',
+          marginBottom: '48px',
+        }}>
+          {/* Kolom 1: PreLove */}
+          <div>
+            <h3 style={{ fontWeight: 800, color: 'white', marginBottom: '16px', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              PreLove
+            </h3>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {[
+                { label: 'Tentang PreLove', href: '/info/about' },
+                { label: 'Hak Kekayaan Intelektual', href: '/info/hki' },
+                { label: 'Karir', href: '/info/karir' },
+                { label: 'Blog', href: '/info/blog' },
+                { label: 'Dampak Lingkungan', href: '/info/sustainability' },
+              ].map(item => (
+                <li key={item.href}>
+                  <Link href={item.href} style={{
+                    fontSize: '14px', color: 'rgba(255,255,255,0.55)', textDecoration: 'none',
+                    transition: 'color 0.2s', fontWeight: 500,
+                  }}
+                  className="hover:text-purple-400">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-
-
-          {/* Kolom 3: Bantuan dan Panduan */}
+          {/* Kolom 2: Bantuan */}
           <div>
-            <h3 className="font-bold text-white mb-4 text-[15px]">Bantuan dan Panduan</h3>
-            <ul className="flex flex-col gap-3 text-[14px]">
-              <li><Link href="/info/care" className="hover:text-purple-400 transition-colors">PreLove Care</Link></li>
-              <li><Link href="/info/terms" className="hover:text-purple-400 transition-colors">Syarat dan Ketentuan</Link></li>
-              <li><Link href="/info/privacy" className="hover:text-purple-400 transition-colors">Kebijakan Privasi</Link></li>
+            <h3 style={{ fontWeight: 800, color: 'white', marginBottom: '16px', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              Bantuan
+            </h3>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {[
+                { label: 'PreLove Care', href: '/info/care' },
+                { label: 'Syarat dan Ketentuan', href: '/info/terms' },
+                { label: 'Kebijakan Privasi', href: '/info/privacy' },
+              ].map(item => (
+                <li key={item.href}>
+                  <Link href={item.href} style={{
+                    fontSize: '14px', color: 'rgba(255,255,255,0.55)', textDecoration: 'none',
+                    transition: 'color 0.2s', fontWeight: 500,
+                  }}
+                  className="hover:text-purple-400">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Kolom 3: Keamanan, Media Sosial, & Brand */}
-          <div className="flex flex-col">
-            <h3 className="font-bold text-white mb-5 text-[15px]">Keamanan & Privasi</h3>
-            
-            {/* Badges Stacked Vertically */}
-            <div className="flex flex-col gap-4 mb-10 w-fit">
-              <div className="flex items-center gap-3 px-5 py-3 bg-white/5 border border-white/10 rounded-xl">
-                <ShieldCheck className="w-6 h-6 text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                <span className="text-[13px] font-black tracking-wide whitespace-nowrap text-white/90">100% AMAN</span>
+          {/* Kolom 3: Keamanan & Sosial */}
+          <div>
+            <h3 style={{ fontWeight: 800, color: 'white', marginBottom: '16px', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              Keamanan
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '10px',
+                padding: '10px 14px', background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', width: 'fit-content',
+              }}>
+                <ShieldCheck size={16} color="#34D399" />
+                <span style={{ fontSize: '12px', fontWeight: 800, color: 'rgba(255,255,255,0.85)', letterSpacing: '0.05em' }}>100% AMAN</span>
               </div>
-              <div className="flex items-center gap-3 px-5 py-3 bg-white/5 border border-white/10 rounded-xl">
-                <ShieldCheck className="w-6 h-6 text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]" />
-                <span className="text-[13px] font-black tracking-wide whitespace-nowrap text-white/90">PCI DSS SECURE</span>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '10px',
+                padding: '10px 14px', background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', width: 'fit-content',
+              }}>
+                <ShieldCheck size={16} color="#60A5FA" />
+                <span style={{ fontSize: '12px', fontWeight: 800, color: 'rgba(255,255,255,0.85)', letterSpacing: '0.05em' }}>PCI DSS SECURE</span>
               </div>
             </div>
 
-            <h3 className="font-bold text-white mb-5 text-[15px]">Ikuti Kami</h3>
-            <div className="flex flex-wrap items-center gap-4 mb-10">
-              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-purple-500 hover:text-white transition-colors">
-                <Camera size={18} />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors">
-                <MessageCircle size={18} />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-sky-500 hover:text-white transition-colors">
-                <Hash size={18} />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors">
-                <Video size={18} />
-              </a>
-            </div>
-            
-            {/* Logo in the right corner like Tokopedia */}
-            <div className="flex items-center gap-3 opacity-50 mt-auto pt-4">
-              <ShoppingBag size={28} className="text-purple-400" />
-              <span className="font-black text-2xl text-white tracking-tight">PreLove.</span>
+            <h3 style={{ fontWeight: 800, color: 'white', marginBottom: '14px', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              Ikuti Kami
+            </h3>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              {[
+                { icon: <Camera size={16} />, color: '#A855F7' },
+                { icon: <MessageCircle size={16} />, color: '#3B82F6' },
+                { icon: <Hash size={16} />, color: '#0EA5E9' },
+                { icon: <Video size={16} />, color: '#EF4444' },
+              ].map((s, i) => (
+                <a key={i} href="#" style={{
+                  width: '38px', height: '38px', borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.08)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: 'rgba(255,255,255,0.5)', transition: 'all 0.2s', textDecoration: 'none',
+                }}
+                className="hover:scale-110 hover:border-white/20 hover:text-white">
+                  {s.icon}
+                </a>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Footer Bottom Bar */}
-        <div className="mt-12 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-[13px] text-white/50">
-          <p>&copy; 2024 - 2026, PT. PreLove Indonesia</p>
-          <div className="flex gap-6">
-            <Link href="#" className="hover:text-white">Server Status</Link>
-            <Link href="#" className="hover:text-white">Bug Bounty</Link>
+        {/* Divider */}
+        <div style={{ height: '1px', background: 'rgba(255,255,255,0.07)', marginBottom: '24px' }} />
+
+        {/* Bottom Bar */}
+        <div style={{
+          display: 'flex', flexWrap: 'wrap', alignItems: 'center',
+          justifyContent: 'space-between', gap: '12px',
+          fontSize: '13px', color: 'rgba(255,255,255,0.35)',
+        }}>
+          <p style={{ margin: 0 }}>&copy; 2024–2026 PT. PreLove Indonesia. Hak cipta dilindungi.</p>
+          <div style={{ display: 'flex', gap: '24px' }}>
+            <Link href="#" style={{ color: 'rgba(255,255,255,0.35)', textDecoration: 'none' }} className="hover:text-white transition-colors">Server Status</Link>
+            <Link href="#" style={{ color: 'rgba(255,255,255,0.35)', textDecoration: 'none' }} className="hover:text-white transition-colors">Bug Bounty</Link>
           </div>
         </div>
-        
+
       </div>
     </footer>
   );

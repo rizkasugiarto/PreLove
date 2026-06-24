@@ -92,7 +92,7 @@ export default function CartPage() {
         <div className="absolute top-[10%] -right-[10%] w-[40%] h-[60%] rounded-full blur-[100px] bg-emerald-200/40 mix-blend-multiply" />
       </div>
 
-      <div className="max-w-[1200px] mx-auto px-4 lg:px-8 relative z-10">
+      <div style={{ width: '100%', maxWidth: '1200px', margin: '0 auto' }} className="px-4 lg:px-8 relative z-10">
         <h1 style={{ fontSize: '36px', fontWeight: 900, color: '#111827', marginBottom: '40px', display: 'flex', alignItems: 'center', gap: '16px', letterSpacing: '-0.02em' }}>
           <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px', border: '1px solid rgba(255,255,255,0.8)', boxShadow: '0 8px 16px rgba(124,58,237,0.05)' }}>🛒</div>
           Keranjang Belanja

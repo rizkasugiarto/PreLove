@@ -25,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="bg-gray-50 font-sans antialiased flex flex-col min-h-screen">
         <AuthProvider>
           <Navbar />
-          <main className="flex-1">{children}</main>
+          <main className="flex-1 w-full">{children}</main>
           <Footer />
           <Toaster
             position="top-center"

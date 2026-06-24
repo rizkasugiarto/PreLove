@@ -8,6 +8,7 @@ import { CONDITIONS } from '@/lib/utils';
 import { ArrowLeft, Save, UploadCloud, X, Loader2, Info, Box, Tag, FileText, DollarSign, Archive, Weight } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import LogoLoader from '@/components/LogoLoader';
 
 export default function SellerEditProductPage() {
   const { user, profile, loading } = useAuth();
@@ -107,11 +108,7 @@ export default function SellerEditProductPage() {
     }
   };
 
-  if (loading || fetching) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FAFAFA' }}>
-      <div style={{ width: '40px', height: '40px', border: '4px solid #EDE9FE', borderTopColor: '#7C3AED', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-    </div>
-  );
+  if (loading || fetching) return <LogoLoader text="Memuat Data Produk..." />;
 
   // 100% Matching Styles with Open Store Page
   const inputStyle: React.CSSProperties = {

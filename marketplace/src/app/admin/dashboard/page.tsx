@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { formatPrice } from '@/lib/utils';
 import { Users, Store, Package, AlertTriangle, ShieldCheck, Activity } from 'lucide-react';
+import LogoLoader from '@/components/LogoLoader';
 
 export default function AdminDashboardPage() {
   const { user, profile, loading } = useAuth();
@@ -59,11 +60,7 @@ export default function AdminDashboardPage() {
     setReports(prev => prev.map(r => r.id === id ? { ...r, status: 'resolved' } : r));
   };
 
-  if (loading || fetching) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
-      <div className="w-12 h-12 rounded-full border-4 border-violet-200 border-t-violet-600 animate-spin" />
-    </div>
-  );
+  if (loading || fetching) return <LogoLoader text="Menyiapkan Dashboard Admin..." />;
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>

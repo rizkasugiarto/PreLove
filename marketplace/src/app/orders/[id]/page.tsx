@@ -8,6 +8,7 @@ import { formatPrice, formatDate, ORDER_STATUS } from '@/lib/utils';
 import { ArrowLeft, MapPin, Store, CreditCard, MessageCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import LogoLoader from '@/components/LogoLoader';
 
 export default function OrderDetailPage() {
   const { user, loading } = useAuth();
@@ -47,12 +48,7 @@ export default function OrderDetailPage() {
     }
   };
 
-  if (loading || fetching) return (
-    <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at top left, #EDE9FE 0%, #F5F3FF 40%, #EFF6FF 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: '48px', height: '48px', border: '4px solid rgba(139,92,246,0.2)', borderTop: '4px solid #8B5CF6', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-    </div>
-  );
+  if (loading || fetching) return <LogoLoader text="Memuat Rincian Pesanan..." />;
 
   if (!order) return (
     <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at top left, #EDE9FE 0%, #F5F3FF 40%, #EFF6FF 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

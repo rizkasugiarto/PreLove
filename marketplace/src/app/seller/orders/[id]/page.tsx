@@ -7,6 +7,8 @@ import { supabase } from '@/lib/supabase';
 import { formatPrice, formatDate, ORDER_STATUS } from '@/lib/utils';
 import { ArrowLeft, MapPin, User, CreditCard, Clock, Truck } from 'lucide-react';
 import Link from 'next/link';
+import LogoLoader from '@/components/LogoLoader';
+import BackButton from '@/components/BackButton';
 
 export default function SellerOrderDetailPage() {
   const { user, profile, loading } = useAuth();
@@ -36,12 +38,7 @@ export default function SellerOrderDetailPage() {
     setFetching(false);
   };
 
-  if (loading || fetching) return (
-    <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at top left, #EDE9FE 0%, #F5F3FF 40%, #EFF6FF 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ width: '48px', height: '48px', border: '4px solid rgba(139,92,246,0.2)', borderTop: '4px solid #8B5CF6', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-    </div>
-  );
+  if (loading || fetching) return <LogoLoader text="Memuat Detail Pesanan..." />;
 
   if (!order) return (
     <div style={{ minHeight: '100vh', background: 'radial-gradient(ellipse at top left, #EDE9FE 0%, #F5F3FF 40%, #EFF6FF 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -65,12 +62,7 @@ export default function SellerOrderDetailPage() {
         
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
-          <button onClick={() => router.back()} style={{
-            width: '44px', height: '44px', borderRadius: '16px', background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(10px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', flexShrink: 0, cursor: 'pointer'
-          }} className="hover:bg-white hover:scale-105 transition-all">
-            <ArrowLeft size={20} color="#374151" />
-          </button>
+          <BackButton />
           <div style={{ minWidth: 0 }}>
             <h1 style={{ fontSize: '28px', fontWeight: 900, margin: '0 0 4px 0', letterSpacing: '-0.5px', color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Detail Pesanan</h1>
             <p style={{ fontSize: '14px', color: '#6B7280', margin: 0, fontWeight: 600 }}>{order.order_number}</p>

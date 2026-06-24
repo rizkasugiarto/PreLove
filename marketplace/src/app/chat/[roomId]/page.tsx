@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { formatRelativeTime } from '@/lib/utils';
-import { ArrowLeft, Send, Image as ImageIcon, Package, Store, MessageCircle, Check, CheckCheck } from 'lucide-react';
+import { ArrowLeft, Send, Package, Store, MessageCircle, Check, CheckCheck, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
@@ -29,7 +29,6 @@ export default function ChatRoomPage() {
       fetchMessages();
       markRead();
 
-      // Realtime subscription
       const channel = supabase
         .channel(`room:${roomId}`)
         .on('postgres_changes', {
@@ -100,8 +99,6 @@ export default function ChatRoomPage() {
         if (prev.find(m => m.id === insertedMsg.id)) return prev;
         return [...prev, newMsgObj];
       });
-
-      // update last_message
       await supabase.from('chat_rooms').update({
         last_message: msg,
         last_message_at: new Date().toISOString(),
@@ -118,91 +115,162 @@ export default function ChatRoomPage() {
     }
   };
 
+  const QUICK = [
+    'Hai, barang ini masih ready? 👋',
+    'Boleh minta detail foto aslinya? 📸',
+    'Apakah harga masih bisa nego? 🙏',
+    'Ada minus/cacat pada barang? 🔍',
+  ];
+
   return (
-    <div className="fixed top-[64px] inset-x-0 bottom-0 z-40 bg-[#F4F4F5] flex justify-center p-0 md:p-6 lg:p-10">
-      
-      {/* Main Chat Container - Premium Clean Style */}
-      <div className="w-full max-w-3xl h-full bg-[#F9FAFB] md:rounded-[32px] md:border border-gray-200 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] flex flex-col overflow-hidden relative mx-auto">
-        
-        {/* HEADER - Clean & Crisp */}
-        <div className="bg-white px-4 py-3 sm:px-6 sm:py-4 flex items-center gap-4 flex-shrink-0 z-20 border-b border-gray-100 shadow-sm relative">
-          <button onClick={() => router.back()} className="p-2 -ml-2 rounded-full hover:bg-gray-50 transition-colors">
-            <ArrowLeft className="w-5 h-5 text-gray-700" />
+    <div style={{
+      position: 'fixed', top: '64px', left: 0, right: 0, bottom: 0,
+      background: 'radial-gradient(ellipse at top left, #EDE9FE 0%, #F5F3FF 40%, #EFF6FF 100%)',
+      display: 'flex', justifyContent: 'center', alignItems: 'stretch',
+      padding: '0', zIndex: 40,
+    }}>
+      {/* Aurora blobs */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: '-10%', left: '-5%', width: '40%', height: '60%', borderRadius: '50%', filter: 'blur(80px)', background: 'rgba(196,181,253,0.35)', mixBlendMode: 'multiply' }} />
+        <div style={{ position: 'absolute', bottom: '10%', right: '-5%', width: '35%', height: '50%', borderRadius: '50%', filter: 'blur(80px)', background: 'rgba(167,243,208,0.3)', mixBlendMode: 'multiply' }} />
+      </div>
+
+      {/* Chat container */}
+      <div style={{
+        width: '100%', maxWidth: '780px', height: '100%',
+        background: 'rgba(255,255,255,0.75)',
+        backdropFilter: 'blur(32px)', WebkitBackdropFilter: 'blur(32px)',
+        borderLeft: '1px solid rgba(255,255,255,0.8)',
+        borderRight: '1px solid rgba(255,255,255,0.8)',
+        display: 'flex', flexDirection: 'column', overflow: 'hidden',
+        position: 'relative', zIndex: 10,
+        boxShadow: '0 0 60px rgba(124,58,237,0.06)',
+      }}>
+
+        {/* ── HEADER ── */}
+        <div style={{
+          background: 'rgba(255,255,255,0.95)',
+          borderBottom: '1px solid rgba(139,92,246,0.1)',
+          padding: '14px 20px',
+          display: 'flex', alignItems: 'center', gap: '14px',
+          flexShrink: 0, backdropFilter: 'blur(20px)',
+          boxShadow: '0 4px 20px rgba(124,58,237,0.06)',
+        }}>
+          {/* Back btn */}
+          <button onClick={() => router.back()} style={{
+            width: '40px', height: '40px', borderRadius: '14px',
+            background: 'rgba(237,233,254,0.6)',
+            border: '1.5px solid rgba(139,92,246,0.15)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', flexShrink: 0, transition: 'all 0.2s',
+          }}>
+            <ArrowLeft size={18} color="#7C3AED" />
           </button>
-          
-          <div className="relative flex-shrink-0">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center">
-              {room?.store?.logo_url ? (
-                <img src={room.store.logo_url} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <Store className="w-5 h-5 text-gray-400" />
-              )}
+
+          {/* Store avatar */}
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <div style={{
+              width: '46px', height: '46px', borderRadius: '16px', overflow: 'hidden',
+              background: 'linear-gradient(135deg, #EDE9FE, #F3E8FF)',
+              border: '2px solid rgba(139,92,246,0.15)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {room?.store?.logo_url
+                ? <img src={room.store.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : <Store size={20} color="#8B5CF6" />}
             </div>
-            {/* Online indicator */}
-            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+            <span style={{
+              position: 'absolute', bottom: '-1px', right: '-1px',
+              width: '13px', height: '13px', background: '#10B981',
+              border: '2px solid white', borderRadius: '50%',
+            }} />
           </div>
 
-          <div className="flex-1 min-w-0">
-            <h2 className="font-bold text-[15px] sm:text-[17px] text-gray-900 truncate tracking-tight">
-              {room?.store?.name ?? 'Nama Toko'}
+          {/* Store name */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h2 style={{ fontWeight: 900, fontSize: '16px', color: '#111827', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {room?.store?.name ?? 'Toko Penjual'}
             </h2>
-            <p className="text-[12px] sm:text-[13px] text-emerald-600 font-medium tracking-wide flex items-center gap-1 mt-0.5">
+            <p style={{ fontSize: '12px', color: '#10B981', fontWeight: 700, margin: '2px 0 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981', display: 'inline-block' }} />
               Online
             </p>
           </div>
+
+          {/* Logo badge */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', opacity: 0.4 }}>
+            <ShoppingBag size={18} color="#7C3AED" />
+            <span style={{ fontWeight: 900, fontSize: '14px', color: '#7C3AED' }}>PreLove</span>
+          </div>
         </div>
 
-        {/* PRODUCT CONTEXT - Centered Minimalist Card */}
+        {/* ── PRODUCT CARD ── */}
         {room?.product && (
-          <div className="bg-white/80 backdrop-blur-md border-b border-gray-100 p-3 flex justify-center flex-shrink-0 z-10">
-            <div className="w-full max-w-md">
-              <Link href={`/products/${room.product.id}`} className="flex items-center gap-3 sm:gap-4 p-2.5 rounded-2xl hover:bg-gray-50 transition-colors group border border-transparent hover:border-gray-200 bg-white shadow-sm">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0">
-                  {room.product.images?.[0]?.image_url ? (
-                    <img src={room.product.images[0].image_url} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center"><Package className="w-6 h-6 text-gray-300" /></div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <span className="font-semibold text-[14px] sm:text-[15px] text-gray-900 block truncate group-hover:text-violet-600 transition-colors">
-                    {room.product.title}
-                  </span>
-                  <span className="font-bold text-[14px] text-violet-600 mt-0.5 block">
-                    Rp {room.product.price?.toLocaleString('id-ID')}
-                  </span>
-                </div>
-              </Link>
-            </div>
+          <div style={{
+            background: 'rgba(255,255,255,0.7)',
+            borderBottom: '1px solid rgba(139,92,246,0.08)',
+            padding: '10px 20px',
+            flexShrink: 0,
+          }}>
+            <Link href={`/products/${room.product.id}`} style={{
+              display: 'flex', alignItems: 'center', gap: '12px',
+              background: 'rgba(255,255,255,0.9)',
+              border: '1px solid rgba(139,92,246,0.12)',
+              borderRadius: '16px', padding: '10px 14px',
+              textDecoration: 'none', transition: 'all 0.2s',
+              boxShadow: '0 2px 12px rgba(124,58,237,0.06)',
+            }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '12px', overflow: 'hidden', background: '#F3F4F6', flexShrink: 0, border: '1px solid rgba(0,0,0,0.04)' }}>
+                {room.product.images?.[0]?.image_url
+                  ? <img src={room.product.images[0].image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Package size={18} color="#D1D5DB" /></div>}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ fontWeight: 700, fontSize: '13px', color: '#374151', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {room.product.title}
+                </span>
+                <span style={{ fontWeight: 900, fontSize: '14px', color: '#7C3AED', background: 'linear-gradient(135deg,#7C3AED,#DB2777)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  Rp {room.product.price?.toLocaleString('id-ID')}
+                </span>
+              </div>
+              <span style={{ fontSize: '11px', fontWeight: 800, color: '#7C3AED', background: '#F5F3FF', padding: '4px 10px', borderRadius: '999px', flexShrink: 0, border: '1px solid #DDD6FE' }}>Lihat →</span>
+            </Link>
           </div>
         )}
 
-        {/* MESSAGES AREA - Subtle Pattern */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 z-0 relative" style={{ backgroundImage: 'radial-gradient(#E5E7EB 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
+        {/* ── MESSAGES ── */}
+        <div style={{
+          flex: 1, overflowY: 'auto', padding: '20px',
+          display: 'flex', flexDirection: 'column', gap: '8px',
+          background: 'transparent',
+          backgroundImage: 'radial-gradient(rgba(139,92,246,0.06) 1px, transparent 1px)',
+          backgroundSize: '28px 28px',
+        }}>
           {messages.length === 0 && (
-            <div className="text-center py-20 max-w-sm mx-auto">
-              <div className="w-20 h-20 bg-white shadow-sm border border-gray-100 rounded-full flex items-center justify-center mx-auto mb-5">
-                <MessageCircle className="w-8 h-8 text-violet-500" />
+            <div style={{ textAlign: 'center', margin: 'auto', padding: '40px 24px' }}>
+              <div style={{
+                width: '72px', height: '72px', borderRadius: '24px',
+                background: 'rgba(255,255,255,0.9)',
+                border: '1.5px solid rgba(139,92,246,0.15)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 16px',
+                boxShadow: '0 8px 24px rgba(124,58,237,0.1)',
+              }}>
+                <MessageCircle size={30} color="#8B5CF6" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Pesan Penjual</h3>
-              <p className="text-[14px] text-gray-500 leading-relaxed">Punya pertanyaan soal produk ini? Jangan ragu untuk chat penjual sekarang.</p>
+              <h3 style={{ fontWeight: 900, fontSize: '18px', color: '#111827', margin: '0 0 8px' }}>Mulai Percakapan</h3>
+              <p style={{ fontSize: '14px', color: '#9CA3AF', margin: 0, lineHeight: 1.6 }}>Tanyakan apapun tentang produk ini langsung ke penjual.</p>
             </div>
           )}
-          
+
           {(() => {
             const isBuyer = user?.id === room?.buyer_id;
             let unreadCount = isBuyer ? (room?.seller_unread_count || 0) : (room?.buyer_unread_count || 0);
             const readStatusMap = new Map();
-            
             for (let i = messages.length - 1; i >= 0; i--) {
               const msg = messages[i];
               if (msg.sender_id === user?.id) {
-                if (unreadCount > 0) {
-                  readStatusMap.set(msg.id ?? i, false);
-                  unreadCount--;
-                } else {
-                  readStatusMap.set(msg.id ?? i, true);
-                }
+                readStatusMap.set(msg.id ?? i, unreadCount > 0 ? (unreadCount--, false) : true);
               }
             }
 
@@ -211,21 +279,26 @@ export default function ChatRoomPage() {
               const isRead = readStatusMap.get(msg.id ?? i);
 
               return (
-                <div key={msg.id ?? i} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[85%] sm:max-w-[75%] px-4 sm:px-5 py-3 relative ${
-                    isMe 
-                      ? 'bg-violet-600 text-white rounded-2xl rounded-tr-sm shadow-sm' 
-                      : 'bg-white text-gray-800 rounded-2xl rounded-tl-sm shadow-sm border border-gray-100'
-                  }`}>
-                    <p className="text-[14px] sm:text-[15px] leading-relaxed" style={{ wordBreak: 'break-word' }}>{msg.message}</p>
-                    <div className={`text-[11px] mt-1.5 font-medium flex items-center gap-1 justify-end ${isMe ? 'text-violet-200' : 'text-gray-400'}`}>
-                      {formatRelativeTime(msg.created_at)}
-                      {isMe && (
-                        isRead ? (
-                          <CheckCheck className="w-4 h-4 text-sky-300" />
-                        ) : (
-                          <Check className="w-4 h-4 text-violet-300" />
-                        )
+                <div key={msg.id ?? i} style={{ display: 'flex', justifyContent: isMe ? 'flex-end' : 'flex-start' }}>
+                  <div style={{
+                    maxWidth: '72%', padding: '12px 16px',
+                    background: isMe
+                      ? 'linear-gradient(135deg, #7C3AED, #9333EA)'
+                      : 'rgba(255,255,255,0.92)',
+                    color: isMe ? 'white' : '#1F2937',
+                    borderRadius: isMe ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
+                    boxShadow: isMe
+                      ? '0 4px 16px rgba(124,58,237,0.25)'
+                      : '0 2px 8px rgba(0,0,0,0.06)',
+                    border: isMe ? 'none' : '1px solid rgba(255,255,255,0.9)',
+                    backdropFilter: isMe ? 'none' : 'blur(8px)',
+                  }}>
+                    <p style={{ fontSize: '14px', lineHeight: 1.6, margin: 0, wordBreak: 'break-word' }}>{msg.message}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px', marginTop: '6px' }}>
+                      <span style={{ fontSize: '11px', opacity: 0.7, fontWeight: 500 }}>{formatRelativeTime(msg.created_at)}</span>
+                      {isMe && (isRead
+                        ? <CheckCheck size={13} color="rgba(125,211,252,0.9)" />
+                        : <Check size={13} color="rgba(255,255,255,0.6)" />
                       )}
                     </div>
                   </div>
@@ -233,59 +306,76 @@ export default function ChatRoomPage() {
               );
             });
           })()}
-          <div ref={bottomRef} className="h-4" />
+          <div ref={bottomRef} style={{ height: '4px' }} />
         </div>
 
-        {/* INPUT AREA WITH QUICK REPLIES */}
-        <div className="bg-white border-t border-gray-200 flex-shrink-0 z-20 flex flex-col">
-          <style dangerouslySetInnerHTML={{__html: `
-            .hide-scroll::-webkit-scrollbar { display: none; }
-            .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-          `}} />
-          
-          {/* Quick Replies - Centered on Laptop */}
+        {/* ── INPUT AREA ── */}
+        <div style={{
+          background: 'rgba(255,255,255,0.92)',
+          backdropFilter: 'blur(20px)',
+          borderTop: '1px solid rgba(139,92,246,0.1)',
+          flexShrink: 0,
+        }}>
+          {/* Quick replies */}
           {room?.product && (
-            <div className="px-3 sm:px-4 pt-3 pb-2 flex justify-start md:justify-center gap-2 w-full mx-auto overflow-x-auto hide-scroll">
-              {[
-                "Hai, barang ini masih ready?",
-                "Boleh minta detail foto aslinya?",
-                "Apakah harga masih bisa nego?",
-                "Apakah ada minus/cacat pada barang?"
-              ].map((qr, i) => (
-                <button
-                  key={i}
-                  onClick={() => setText(qr)}
-                  className="whitespace-nowrap px-4 py-2 bg-white text-violet-700 text-[13px] font-bold rounded-full border border-violet-200 shadow-sm hover:bg-gradient-to-r hover:from-violet-600 hover:to-purple-600 hover:text-white hover:border-transparent hover:shadow-md active:scale-95 transition-all duration-300 flex-shrink-0"
-                >
+            <div style={{ padding: '10px 16px 4px', display: 'flex', gap: '8px', overflowX: 'auto' }}
+              className="hide-scroll">
+              <style>{`.hide-scroll::-webkit-scrollbar{display:none}.hide-scroll{-ms-overflow-style:none;scrollbar-width:none}`}</style>
+              {QUICK.map((qr, i) => (
+                <button key={i} onClick={() => setText(qr)} style={{
+                  whiteSpace: 'nowrap', padding: '7px 14px',
+                  background: 'rgba(237,233,254,0.6)',
+                  color: '#6D28D9', fontSize: '12px', fontWeight: 700,
+                  borderRadius: '999px', border: '1px solid rgba(139,92,246,0.2)',
+                  cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0,
+                }}>
                   {qr}
                 </button>
               ))}
             </div>
           )}
 
-          {/* Actual Input */}
-          <div className="p-3 sm:p-4 flex items-end gap-2 sm:gap-3 w-full">
-            <div className="flex-1 bg-gray-100 rounded-[24px] border border-transparent focus-within:border-violet-300 focus-within:bg-white focus-within:shadow-[0_0_0_4px_rgba(139,92,246,0.1)] transition-all duration-300 relative flex items-center min-h-[48px]">
+          {/* Input row */}
+          <div style={{ padding: '10px 16px 14px', display: 'flex', alignItems: 'flex-end', gap: '10px' }}>
+            <div style={{
+              flex: 1,
+              background: 'rgba(243,244,246,0.8)',
+              borderRadius: '20px',
+              border: '1.5px solid rgba(139,92,246,0.12)',
+              display: 'flex', alignItems: 'center',
+              minHeight: '48px', padding: '0 16px',
+              transition: 'all 0.2s',
+            }}>
               <textarea
                 value={text}
                 onChange={e => setText(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Ketik pesan..."
                 rows={1}
-                className="w-full resize-none bg-transparent border-none px-5 py-3 text-[15px] font-medium text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-0 max-h-32 hide-scroll"
-                style={{ fontFamily: 'var(--font-sans)', display: 'block' }}
+                style={{
+                  width: '100%', background: 'transparent', border: 'none', outline: 'none',
+                  resize: 'none', fontSize: '15px', fontWeight: 500,
+                  color: '#111827', fontFamily: 'inherit', lineHeight: 1.5,
+                  padding: '12px 0', maxHeight: '120px',
+                }}
               />
             </div>
+
             <button
               onClick={sendMessage}
               disabled={!text.trim() || sending}
-              className={`w-[48px] h-[48px] rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
-                text.trim() && !sending 
-                  ? 'bg-gradient-to-tr from-violet-600 to-fuchsia-500 text-white hover:shadow-[0_8px_20px_rgba(139,92,246,0.3)] hover:scale-105 active:scale-95' 
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
+              style={{
+                width: '48px', height: '48px', borderRadius: '16px', flexShrink: 0,
+                background: text.trim() && !sending
+                  ? 'linear-gradient(135deg, #7C3AED, #DB2777)'
+                  : 'rgba(229,231,235,0.8)',
+                border: 'none', cursor: text.trim() ? 'pointer' : 'not-allowed',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: text.trim() ? '0 4px 16px rgba(124,58,237,0.3)' : 'none',
+                transition: 'all 0.2s',
+              }}
             >
-              <Send className={`w-[22px] h-[22px] ${text.trim() ? 'ml-0.5' : ''}`} />
+              <Send size={20} color={text.trim() ? 'white' : '#9CA3AF'} style={{ marginLeft: '2px' }} />
             </button>
           </div>
         </div>

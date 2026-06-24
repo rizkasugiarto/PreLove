@@ -6,7 +6,8 @@ import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
-import { Plus, Package, ShoppingBag, Star, Pencil, Trash2, Check, X, Truck, TrendingUp, AlertCircle, Edit3, Image as ImageIcon, Store, ExternalLink } from 'lucide-react';
+import { Plus, Package, ShoppingBag, Star, Pencil, Trash2, Check, X, Truck, TrendingUp, AlertCircle, Edit3, Image as ImageIcon, Store, ExternalLink, Settings } from 'lucide-react';
+import LogoLoader from '@/components/LogoLoader';
 
 const ORDER_TABS = ['Semua', 'Pending', 'Dikonfirmasi', 'Dikemas', 'Dikirim', 'Selesai'];
 const TAB_STATUS: Record<string, string[]> = {
@@ -114,11 +115,7 @@ export default function SellerDashboardPage() {
     fetchAllOrders(store.id);
   };
 
-  if (loading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FAFAFA' }}>
-      <div style={{ width: '40px', height: '40px', border: '4px solid #EDE9FE', borderTopColor: '#7C3AED', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-    </div>
-  );
+  if (loading) return <LogoLoader text="Menyiapkan Dashboard..." />;
 
   const pendingOrdersCount = allOrders.filter(o => o.status === 'pending' || o.status === 'waiting_payment').length;
 
@@ -148,12 +145,22 @@ export default function SellerDashboardPage() {
               <p style={{ fontSize: '14px', color: '#6B7280', margin: 0 }}>Kelola produk dan pesanan tokomu dengan mudah.</p>
             </div>
           </div>
-          <button 
-            onClick={() => router.push('/seller/products/add')} 
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 100%)', color: '#fff', fontSize: '14px', fontWeight: 700, border: 'none', borderRadius: '14px', cursor: 'pointer', boxShadow: '0 8px 24px rgba(124,58,237,0.3)', transition: 'all 0.2s' }}
-          >
-            <Plus size={18} /> Tambah Produk
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            <button 
+              onClick={() => router.push('/seller/settings')} 
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', background: 'rgba(255,255,255,0.6)', color: '#4B5563', fontSize: '14px', fontWeight: 700, border: '1px solid #D1D5DB', borderRadius: '14px', cursor: 'pointer', transition: 'all 0.2s' }}
+              className="hover:bg-white hover:border-purple-300 hover:text-purple-600"
+            >
+              <Settings size={18} /> Pengaturan Toko
+            </button>
+            <button 
+              onClick={() => router.push('/seller/products/add')} 
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 100%)', color: '#fff', fontSize: '14px', fontWeight: 700, border: 'none', borderRadius: '14px', cursor: 'pointer', boxShadow: '0 8px 24px rgba(124,58,237,0.3)', transition: 'all 0.2s' }}
+              className="hover:-translate-y-0.5"
+            >
+              <Plus size={18} /> Tambah Produk
+            </button>
+          </div>
         </div>
 
         {/* Stats Grid */}
