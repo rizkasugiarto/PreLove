@@ -1,8 +1,9 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import BackButton from '@/components/BackButton';
-import { ArrowLeft, ShieldCheck, FileText, Heart, Globe, Users, Briefcase, Zap, Mail, Phone, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, ShieldCheck, FileText, Heart, Globe, Users, Briefcase, Zap, Mail, Phone, CheckCircle2, Package, RefreshCw, Lock, Store } from 'lucide-react';
 
 const BG = 'radial-gradient(ellipse at top left, #EDE9FE 0%, #F5F3FF 40%, #EFF6FF 100%)';
 
@@ -164,8 +165,7 @@ const PAGES: Record<string, { title: string; emoji: string; icon: any; content: 
           <p style={ps}>Tim PreLove Care siap membantu menyelesaikan semua masalah transaksimu kapan saja.</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '16px' }}>
             {[
-              { icon: '📧', label: 'Email Support', val: 'support@prelove.test' },
-              { icon: '📱', label: 'WhatsApp (Chat Only)', val: '+62 811-2233-4455' },
+              { icon: '📧', label: 'Email Support', val: 'support@prelove.id' },
               { icon: '⏰', label: 'Jam Operasional', val: 'Senin–Jumat, 09.00–18.00 WIB' },
             ].map(c => (
               <div key={c.label} style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'rgba(249,250,251,0.8)', border: '1px solid rgba(0,0,0,0.04)', borderRadius: '16px', padding: '16px' }}>
@@ -180,14 +180,154 @@ const PAGES: Record<string, { title: string; emoji: string; icon: any; content: 
         </div>
         <div style={card}>
           <h2 style={{ ...h2s, marginTop: 0 }}>Topik Bantuan Populer</h2>
-          {['Cara melacak pesanan saya', 'Barang tidak sesuai deskripsi', 'Pengembalian dana (refund)', 'Masalah login / akun terkunci', 'Cara menjadi penjual'].map(t => (
-            <div key={t} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px dashed #F3F4F6' }}>
-              <span style={{ fontSize: '14px', color: '#374151', fontWeight: 500 }}>{t}</span>
-              <ArrowLeft size={14} color="#9CA3AF" style={{ transform: 'rotate(180deg)' }} />
-            </div>
+          {[
+            { slug: 'help-tracking', label: 'Cara melacak pesanan saya', icon: '📦' },
+            { slug: 'help-dispute',  label: 'Barang tidak sesuai deskripsi', icon: '⚠️' },
+            { slug: 'help-refund',   label: 'Pengembalian dana (refund)', icon: '💸' },
+            { slug: 'help-login',    label: 'Masalah login / akun terkunci', icon: '🔐' },
+            { slug: 'help-seller',   label: 'Cara menjadi penjual', icon: '🏪' },
+          ].map(t => (
+            <Link key={t.slug} href={`/info/${t.slug}`} style={{ textDecoration: 'none' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: '1px dashed #F3F4F6', cursor: 'pointer', transition: 'all 0.15s' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.paddingLeft = '8px'; (e.currentTarget as HTMLElement).style.color = '#7C3AED'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.paddingLeft = '0'; (e.currentTarget as HTMLElement).style.color = '#374151'; }}
+              >
+                <span style={{ fontSize: '14px', color: 'inherit', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '18px' }}>{t.icon}</span>{t.label}
+                </span>
+                <ArrowRight size={15} color="#9CA3AF" />
+              </div>
+            </Link>
           ))}
         </div>
       </>
+    ),
+  },
+  'help-tracking': {
+    title: 'Cara Melacak Pesanan', emoji: '📦', icon: Package,
+    content: (
+      <div style={card}>
+        <h2 style={{ ...h2s, marginTop: 0 }}>Cara Melacak Pesanan Saya</h2>
+        {[
+          { step: '1', title: 'Buka menu Pesanan Saya', desc: 'Klik ikon profil di pojok kanan atas, lalu pilih "Pesanan Saya".' },
+          { step: '2', title: 'Pilih pesanan yang ingin dilacak', desc: 'Cari pesanan dengan status "Sedang Dikirim" dan klik untuk melihat detail.' },
+          { step: '3', title: 'Lihat nomor resi', desc: 'Nomor resi pengiriman akan tampil di halaman detail pesanan setelah penjual menginputnya.' },
+          { step: '4', title: 'Lacak di situs kurir', desc: 'Salin nomor resi dan kunjungi website kurir (JNE, SiCepat, dll.) untuk melihat posisi paketmu.' },
+        ].map(s => (
+          <div key={s.step} style={{ display: 'flex', gap: '16px', padding: '16px 0', borderBottom: '1px dashed #F3F4F6' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #7C3AED, #A855F7)', color: 'white', fontWeight: 900, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{s.step}</div>
+            <div><p style={{ fontWeight: 800, color: '#111827', margin: '0 0 4px', fontSize: '14px' }}>{s.title}</p><p style={{ ...ps, margin: 0 }}>{s.desc}</p></div>
+          </div>
+        ))}
+        <div style={{ marginTop: '20px', padding: '14px', background: '#F5F3FF', borderRadius: '14px' }}>
+          <p style={{ fontSize: '13px', color: '#5B21B6', fontWeight: 600, margin: 0 }}>💡 Pesanan belum diupdate? Hubungi penjual via fitur Chat atau email <strong>support@prelove.id</strong></p>
+        </div>
+      </div>
+    ),
+  },
+  'help-dispute': {
+    title: 'Barang Tidak Sesuai', emoji: '⚠️', icon: ShieldCheck,
+    content: (
+      <div style={card}>
+        <h2 style={{ ...h2s, marginTop: 0 }}>Barang Tidak Sesuai Deskripsi</h2>
+        <p style={ps}>Jika barang yang kamu terima tidak sesuai dengan deskripsi penjual, lakukan langkah berikut:</p>
+        {[
+          { step: '1', title: 'Rekam video unboxing', desc: 'Pastikan kamu merekam video saat membuka paket. Video ini wajib ada sebagai bukti klaim.' },
+          { step: '2', title: 'Jangan konfirmasi diterima', desc: 'Jangan klik "Pesanan Diterima" terlebih dahulu sebelum masalah diselesaikan.' },
+          { step: '3', title: 'Hubungi penjual via Chat', desc: 'Coba selesaikan dulu dengan penjual secara langsung melalui fitur Chat PreLove.' },
+          { step: '4', title: 'Ajukan komplain ke PreLove Care', desc: 'Jika tidak ada solusi dalam 1×24 jam, kirim bukti video dan foto ke support@prelove.id.' },
+        ].map(s => (
+          <div key={s.step} style={{ display: 'flex', gap: '16px', padding: '16px 0', borderBottom: '1px dashed #F3F4F6' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #EF4444, #F97316)', color: 'white', fontWeight: 900, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{s.step}</div>
+            <div><p style={{ fontWeight: 800, color: '#111827', margin: '0 0 4px', fontSize: '14px' }}>{s.title}</p><p style={{ ...ps, margin: 0 }}>{s.desc}</p></div>
+          </div>
+        ))}
+        <div style={{ marginTop: '20px', padding: '14px', background: '#FEF2F2', borderRadius: '14px' }}>
+          <p style={{ fontSize: '13px', color: '#B91C1C', fontWeight: 600, margin: 0 }}>⚠️ Klaim tanpa video unboxing tidak dapat diproses. Selalu rekam saat membuka paket!</p>
+        </div>
+      </div>
+    ),
+  },
+  'help-refund': {
+    title: 'Pengembalian Dana', emoji: '💸', icon: RefreshCw,
+    content: (
+      <div style={card}>
+        <h2 style={{ ...h2s, marginTop: 0 }}>Pengembalian Dana (Refund)</h2>
+        <p style={ps}>Refund dapat diproses dalam kondisi berikut:</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+          {[
+            '✅ Penjual membatalkan pesanan secara sepihak',
+            '✅ Barang terbukti tidak sesuai deskripsi (disertai video)',
+            '✅ Barang tidak kunjung dikirim dalam 3×24 jam',
+            '❌ Pembeli berubah pikiran / salah pesan',
+            '❌ Barang sudah dikonfirmasi diterima',
+          ].map(t => (
+            <div key={t} style={{ padding: '10px 14px', background: t.startsWith('✅') ? '#ECFDF5' : '#FEF2F2', borderRadius: '10px' }}>
+              <p style={{ fontSize: '13px', fontWeight: 600, color: t.startsWith('✅') ? '#065F46' : '#991B1B', margin: 0 }}>{t}</p>
+            </div>
+          ))}
+        </div>
+        <h2 style={h2s}>Estimasi Waktu Refund</h2>
+        {[
+          { method: 'Saldo PreLove', time: '1–2 jam' },
+          { method: 'Transfer Bank', time: '1–3 hari kerja' },
+          { method: 'Dompet Digital', time: '1–2 hari kerja' },
+        ].map(r => (
+          <div key={r.method} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px dashed #F3F4F6' }}>
+            <span style={{ fontSize: '14px', color: '#374151', fontWeight: 600 }}>{r.method}</span>
+            <span style={{ fontSize: '13px', fontWeight: 800, color: '#7C3AED' }}>{r.time}</span>
+          </div>
+        ))}
+        <div style={{ marginTop: '16px', padding: '14px', background: '#F5F3FF', borderRadius: '14px' }}>
+          <p style={{ fontSize: '13px', color: '#5B21B6', fontWeight: 600, margin: 0 }}>📩 Ajukan refund ke <strong>support@prelove.id</strong> dengan menyertakan nomor pesanan dan bukti.</p>
+        </div>
+      </div>
+    ),
+  },
+  'help-login': {
+    title: 'Masalah Login / Akun', emoji: '🔐', icon: Lock,
+    content: (
+      <div style={card}>
+        <h2 style={{ ...h2s, marginTop: 0 }}>Masalah Login / Akun Terkunci</h2>
+        {[
+          { step: '1', title: 'Lupa password?', desc: 'Klik "Lupa Password" di halaman login. Kami akan kirim link reset ke email yang terdaftar.' },
+          { step: '2', title: 'Email tidak masuk?', desc: 'Cek folder Spam/Junk. Jika tetap tidak ada, coba kirim ulang setelah 1 menit.' },
+          { step: '3', title: 'Akun terkunci/diblokir?', desc: 'Akun dapat terkunci jika ada aktivitas mencurigakan. Hubungi support@prelove.id untuk verifikasi identitas.' },
+          { step: '4', title: 'Tidak bisa akses email terdaftar?', desc: 'Hubungi tim kami dengan KTP atau bukti kepemilikan akun untuk proses pemulihan manual.' },
+        ].map(s => (
+          <div key={s.step} style={{ display: 'flex', gap: '16px', padding: '16px 0', borderBottom: '1px dashed #F3F4F6' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #3B82F6, #6366F1)', color: 'white', fontWeight: 900, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{s.step}</div>
+            <div><p style={{ fontWeight: 800, color: '#111827', margin: '0 0 4px', fontSize: '14px' }}>{s.title}</p><p style={{ ...ps, margin: 0 }}>{s.desc}</p></div>
+          </div>
+        ))}
+        <div style={{ marginTop: '20px', padding: '14px', background: '#EFF6FF', borderRadius: '14px' }}>
+          <p style={{ fontSize: '13px', color: '#1D4ED8', fontWeight: 600, margin: 0 }}>🔒 Jangan pernah bagikan password atau kode OTP kepada siapapun, termasuk tim PreLove!</p>
+        </div>
+      </div>
+    ),
+  },
+  'help-seller': {
+    title: 'Cara Menjadi Penjual', emoji: '🏪', icon: Store,
+    content: (
+      <div style={card}>
+        <h2 style={{ ...h2s, marginTop: 0 }}>Cara Menjadi Penjual di PreLove</h2>
+        <p style={ps}>Buka toko gratis dalam hitungan menit. Tidak ada biaya langganan!</p>
+        {[
+          { step: '1', title: 'Daftar & Login', desc: 'Buat akun PreLove jika belum punya, lalu login ke platform.' },
+          { step: '2', title: 'Buka Toko', desc: 'Klik menu profil → "Buka Toko" atau langsung ke halaman /seller/open-store.' },
+          { step: '3', title: 'Isi Profil Toko', desc: 'Masukkan nama toko, deskripsi, dan foto logo toko. Nama toko tidak bisa diubah setelah disimpan.' },
+          { step: '4', title: 'Tambah Produk', desc: 'Dari dashboard seller, klik "Tambah Produk". Upload foto, isi judul, harga, kondisi, dan stok.' },
+          { step: '5', title: 'Mulai Berjualan!', desc: 'Produkmu akan langsung tampil di marketplace setelah disimpan. Siap menerima pesanan!' },
+        ].map(s => (
+          <div key={s.step} style={{ display: 'flex', gap: '16px', padding: '16px 0', borderBottom: '1px dashed #F3F4F6' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #10B981, #059669)', color: 'white', fontWeight: 900, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{s.step}</div>
+            <div><p style={{ fontWeight: 800, color: '#111827', margin: '0 0 4px', fontSize: '14px' }}>{s.title}</p><p style={{ ...ps, margin: 0 }}>{s.desc}</p></div>
+          </div>
+        ))}
+        <div style={{ marginTop: '20px', padding: '14px', background: '#ECFDF5', borderRadius: '14px' }}>
+          <p style={{ fontSize: '13px', color: '#065F46', fontWeight: 600, margin: 0 }}>🎉 100% Gratis! Tidak ada biaya buka toko maupun komisi transaksi!</p>
+        </div>
+      </div>
     ),
   },
   terms: {

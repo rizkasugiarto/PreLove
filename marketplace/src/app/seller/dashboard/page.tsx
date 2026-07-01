@@ -164,11 +164,17 @@ export default function SellerDashboardPage() {
         </div>
 
         {/* Stats Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '32px' }}>
           <StatCard icon={<Package color="#2563EB" />} title="Total Produk" value={products.length} bg="#EFF6FF" />
           <StatCard icon={<TrendingUp color="#059669" />} title="Produk Terjual" value={store?.total_sales ?? 0} bg="#ECFDF5" />
           <StatCard icon={<ShoppingBag color="#D97706" />} title="Pesanan Baru" value={pendingOrdersCount} bg="#FFFBEB" highlight={pendingOrdersCount > 0} />
           <StatCard icon={<Star color="#7C3AED" />} title="Rating Toko" value={store?.rating?.toFixed(1) ?? '0.0'} bg="#F5F3FF" />
+          <StatCard 
+            icon={<TrendingUp color="#059669" />} 
+            title="Total Pendapatan" 
+            value={formatPrice(allOrders.filter(o => ['delivered','completed'].includes(o.status)).reduce((sum: number, o: any) => sum + (o.total ?? 0), 0))} 
+            bg="#ECFDF5" 
+          />
         </div>
 
         {/* Main Content Area */}

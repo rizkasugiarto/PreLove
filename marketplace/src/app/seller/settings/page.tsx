@@ -8,23 +8,11 @@ import toast from 'react-hot-toast';
 import LogoLoader from '@/components/LogoLoader';
 import BackButton from '@/components/BackButton';
 import { Upload, Store, ArrowRight, MapPin, Building, Phone, ShoppingBag, FileText, ChevronLeft, Save } from 'lucide-react';
-
-const REGIONS: Record<string, string[]> = {
-  'DKI Jakarta': ['Kota Jakarta Selatan', 'Kota Jakarta Pusat', 'Kota Jakarta Barat', 'Kota Jakarta Timur', 'Kota Jakarta Utara'],
-  'Jawa Barat': ['Kota Bandung', 'Kab. Bandung', 'Kab. Bandung Barat', 'Kota Bogor', 'Kab. Bogor', 'Kota Depok', 'Kota Bekasi', 'Kab. Bekasi'],
-  'Jawa Tengah': ['Kota Semarang', 'Kab. Semarang', 'Kota Surakarta', 'Kab. Sukoharjo'],
-  'Jawa Timur': ['Kota Surabaya', 'Kota Malang', 'Kab. Malang', 'Kab. Sidoarjo'],
-  'Banten': ['Kota Tangerang', 'Kota Tangerang Selatan', 'Kab. Tangerang'],
-  'DI Yogyakarta': ['Kota Yogyakarta', 'Kab. Sleman', 'Kab. Bantul'],
-  'Bali': ['Kota Denpasar', 'Kab. Badung']
-};
-const PROVINCES = Object.keys(REGIONS);
-
 export default function StoreSettingsPage() {
   const { user, profile, refreshProfile } = useAuth();
   const router = useRouter();
   const [storeId, setStoreId] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: '', description: '', phone: '', address: '', city: '', province: '' });
+  const [form, setForm] = useState({ name: '', description: '', phone: '', address: '', city: '', province: '', district: '', subdistrict: '' });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -37,13 +25,21 @@ export default function StoreSettingsPage() {
     const storeData = Array.isArray(profile?.store) ? profile.store[0] : profile?.store;
     if (storeData) {
       setStoreId(storeData.id);
+      let parsedAddress = { detail: storeData.address || '', district: '', subdistrict: '' };
+      try {
+        const json = JSON.parse(storeData.address);
+        if (json.detail !== undefined) parsedAddress = json;
+      } catch (e) {}
+
       setForm({
         name: storeData.name || '',
         description: storeData.description || '',
         phone: storeData.phone || '',
-        address: storeData.address || '',
+        address: parsedAddress.detail,
         city: storeData.city || '',
-        province: storeData.province || ''
+        province: storeData.province || '',
+        district: parsedAddress.district || '',
+        subdistrict: parsedAddress.subdistrict || ''
       });
       if (storeData.logo_url) setLogoPreview(storeData.logo_url);
     }
@@ -76,7 +72,7 @@ export default function StoreSettingsPage() {
       const updateData: any = {
         name: form.name.trim(),
         description: form.description.trim(),
-        address: form.address.trim(),
+        address: JSON.stringify({ detail: form.address.trim(), district: form.district.trim(), subdistrict: form.subdistrict.trim() }),
         city: form.city.trim(),
         province: form.province.trim(),
         phone: form.phone.trim(),
@@ -117,6 +113,17 @@ export default function StoreSettingsPage() {
     textTransform: 'uppercase', display: 'block', marginBottom: '6px', marginLeft: '4px'
   };
 
+  const onFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    e.target.style.borderColor = '#7C3AED';
+    e.target.style.background = '#fff';
+    e.target.style.boxShadow = '0 0 0 4px rgba(124,58,237,0.08)';
+  };
+  const onBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    e.target.style.borderColor = '#E5E7EB';
+    e.target.style.background = '#FAFAFA';
+    e.target.style.boxShadow = 'none';
+  };
+
   return (
     <div style={{
       minHeight: '100vh', padding: '32px 16px', paddingBottom: '128px',
@@ -155,7 +162,8 @@ export default function StoreSettingsPage() {
                   {/* Logo Upload */}
                   <div style={{ flexShrink: 0 }}>
                     <label style={labelStyle}>Logo Toko</label>
-                    <label htmlFor="logo-upload" style={{ cursor: 'pointer', display: 'block', marginTop: '8px' }}>
+                    <div style={{ position: 'relative', marginTop: '8px', cursor: 'pointer' }}>
+                      <input id="logo-upload" type="file" accept="image/*" onChange={handleLogoChange} style={{ opacity: 0, position: 'absolute', inset: 0, width: '100%', height: '100%', cursor: 'pointer', zIndex: 10 }} />
                       <div style={{
                         width: '100px', height: '100px', borderRadius: '24px',
                         background: logoPreview ? 'transparent' : '#F5F3FF',
@@ -163,14 +171,14 @@ export default function StoreSettingsPage() {
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         overflow: 'hidden', transition: 'all .2s',
                         boxShadow: logoPreview ? '0 8px 24px rgba(124,58,237,0.2)' : 'none',
+                        position: 'relative', pointerEvents: 'none'
                       }}>
                         {logoPreview
-                          ? <img src={logoPreview} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ? <img src={logoPreview} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement!.innerHTML = '<div style="color:#A78BFA;display:flex;align-items:center;justify-content:center;height:100%;width:100%;">⚠️</div>'; }} />
                           : <Upload size={28} color="#A78BFA" />
                         }
                       </div>
-                    </label>
-                    <input id="logo-upload" type="file" accept="image/*" onChange={handleLogoChange} style={{ display: 'none' }} />
+                    </div>
                   </div>
 
                   {/* Name & Phone */}
@@ -211,13 +219,7 @@ export default function StoreSettingsPage() {
                     <label style={labelStyle}>Provinsi <span style={{ color: '#EF4444' }}>*</span></label>
                     <div style={{ position: 'relative' }}>
                       <MapPin style={iconStyle} size={18} />
-                      <select required value={form.province} onChange={e => setForm(f => ({ ...f, province: e.target.value, city: '' }))} style={{ ...inputStyle, appearance: 'none', cursor: 'pointer', color: form.province ? '#111827' : '#9CA3AF' }} className="focus:bg-white focus:ring-4 focus:ring-purple-500/10 focus:border-purple-400">
-                        <option value="" disabled>Pilih Provinsi</option>
-                        {PROVINCES.map(p => <option key={p} value={p} style={{color: '#111827'}}>{p}</option>)}
-                      </select>
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                      </div>
+                      <input required type="text" placeholder="Jawa Barat" value={form.province} onChange={e => setForm(f => ({ ...f, province: e.target.value }))} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
                     </div>
                   </div>
 
@@ -226,13 +228,25 @@ export default function StoreSettingsPage() {
                     <label style={labelStyle}>Kota/Kabupaten <span style={{ color: '#EF4444' }}>*</span></label>
                     <div style={{ position: 'relative' }}>
                       <Building style={iconStyle} size={18} />
-                      <select required value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} style={{ ...inputStyle, appearance: 'none', cursor: 'pointer', color: form.city ? '#111827' : '#9CA3AF' }} className="focus:bg-white focus:ring-4 focus:ring-purple-500/10 focus:border-purple-400" disabled={!form.province}>
-                        <option value="" disabled>{form.province ? 'Pilih Kota/Kabupaten' : 'Pilih Provinsi Dahulu'}</option>
-                        {(REGIONS[form.province] || []).map(c => <option key={c} value={c} style={{color: '#111827'}}>{c}</option>)}
-                      </select>
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                      </div>
+                      <input required type="text" placeholder="Kota Bandung" value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+                    </div>
+                  </div>
+
+                  {/* District (Kecamatan) */}
+                  <div>
+                    <label style={labelStyle}>Kecamatan <span style={{ color: '#EF4444' }}>*</span></label>
+                    <div style={{ position: 'relative' }}>
+                      <MapPin style={iconStyle} size={18} />
+                      <input required type="text" placeholder="Sukajadi" value={form.district} onChange={e => setForm(f => ({ ...f, district: e.target.value }))} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+                    </div>
+                  </div>
+
+                  {/* Subdistrict (Kelurahan) */}
+                  <div>
+                    <label style={labelStyle}>Kelurahan <span style={{ color: '#EF4444' }}>*</span></label>
+                    <div style={{ position: 'relative' }}>
+                      <MapPin style={iconStyle} size={18} />
+                      <input required type="text" placeholder="Pasteur" value={form.subdistrict} onChange={e => setForm(f => ({ ...f, subdistrict: e.target.value }))} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
                     </div>
                   </div>
                 </div>

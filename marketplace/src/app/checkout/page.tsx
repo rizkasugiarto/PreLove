@@ -10,53 +10,8 @@ import { Upload, X, MapPin, Truck, CreditCard, CheckCircle, ShieldCheck, Package
 
 const COURIERS = ['JNE', 'JNT', 'SiCepat', 'AnterAja'];
 
-const REGIONS: Record<string, Record<string, string[]>> = {
-  'DKI Jakarta': {
-    'Kota Jakarta Selatan': ['Kebayoran Baru', 'Tebet', 'Cilandak', 'Pasar Minggu', 'Pancoran', 'Setiabudi', 'Mampang Prapatan'],
-    'Kota Jakarta Pusat': ['Menteng', 'Tanah Abang', 'Sawah Besar', 'Kemayoran'],
-    'Kota Jakarta Barat': ['Kebon Jeruk', 'Grogol Petamburan', 'Cengkareng'],
-    'Kota Jakarta Timur': ['Jatinegara', 'Duren Sawit', 'Cakung'],
-    'Kota Jakarta Utara': ['Kelapa Gading', 'Penjaringan', 'Tanjung Priok'],
-  },
-  'Jawa Barat': {
-    'Kota Bandung': ['Pasteur', 'Dago', 'Cidadap', 'Coblong'],
-    'Kab. Bandung': ['Baleendah', 'Dayeuhkolot', 'Bojongsoang', 'Soreang'],
-    'Kab. Bandung Barat': ['Lembang', 'Padalarang', 'Cimahi'],
-    'Kota Bogor': ['Bogor Tengah', 'Bogor Timur', 'Bogor Utara', 'Bogor Selatan'],
-    'Kab. Bogor': ['Cibinong', 'Cileungsi', 'Bojonggede', 'Ciawi'],
-    'Kota Depok': ['Margonda', 'Cimanggis', 'Sawangan', 'Beji'],
-    'Kota Bekasi': ['Bekasi Barat', 'Bekasi Timur', 'Bekasi Selatan', 'Medan Satria'],
-    'Kab. Bekasi': ['Cikarang', 'Tambun', 'Cibitung'],
-  },
-  'Jawa Tengah': {
-    'Kota Semarang': ['Semarang Barat', 'Semarang Timur', 'Semarang Selatan', 'Tembalang'],
-    'Kab. Semarang': ['Ungaran', 'Ambarawa', 'Bawen'],
-    'Kota Surakarta': ['Laweyan', 'Serengan', 'Pasar Kliwon', 'Jebres'],
-    'Kab. Sukoharjo': ['Kartasura', 'Grogol', 'Baki'],
-  },
-  'Jawa Timur': {
-    'Kota Surabaya': ['Gubeng', 'Tegalsari', 'Wiyung', 'Wonokromo', 'Rungkut'],
-    'Kota Malang': ['Blimbing', 'Klojen', 'Lowokwaru', 'Sukun'],
-    'Kab. Malang': ['Singosari', 'Kepanjen', 'Batu'],
-    'Kab. Sidoarjo': ['Waru', 'Taman', 'Gedangan', 'Sidoarjo Kota'],
-  },
-  'Banten': {
-    'Kota Tangerang': ['Batuceper', 'Benda', 'Ciledug', 'Cipondoh'],
-    'Kota Tangerang Selatan': ['Serpong', 'Pamulang', 'Ciputat', 'Pondok Aren'],
-    'Kab. Tangerang': ['Cikupa', 'Balaraja', 'Kelapa Dua'],
-  },
-  'DI Yogyakarta': {
-    'Kota Yogyakarta': ['Danurejan', 'Gedongtengen', 'Gondokusuman', 'Jetis'],
-    'Kab. Sleman': ['Depok', 'Gamping', 'Mlati', 'Ngaglik'],
-    'Kab. Bantul': ['Banguntapan', 'Kasihan', 'Sewon', 'Bambanglipuro'],
-  },
-  'Bali': {
-    'Kota Denpasar': ['Denpasar Barat', 'Denpasar Selatan', 'Denpasar Timur', 'Denpasar Utara'],
-    'Kab. Badung': ['Kuta', 'Kuta Selatan', 'Kuta Utara', 'Mengwi'],
-  }
-};
+import { useRegions } from '@/hooks/useRegions';
 
-const PROVINCES = Object.keys(REGIONS);
 const RTS = Array.from({length: 20}, (_, i) => String(i + 1).padStart(3, '0'));
 const RWS = Array.from({length: 20}, (_, i) => String(i + 1).padStart(3, '0'));
 
@@ -67,7 +22,7 @@ export default function CheckoutPage() {
   const [bankAccounts, setBankAccounts] = useState<any[]>([]);
   const [selectedBank, setSelectedBank] = useState<any>(null);
   const [selectedCourier, setSelectedCourier] = useState('JNE');
-  const [address, setAddress] = useState({ name: '', phone: '', detail: '', province: '', city: '', subdistrict: '', rt: '', rw: '' });
+  const [address, setAddress] = useState({ name: '', phone: '', detail: '', province: '', city: '', subdistrict: '', kelurahan: '', rt: '', rw: '' });
   const [isDropship, setIsDropship] = useState(false);
   const [dropshipInfo, setDropshipInfo] = useState({ name: '', phone: '' });
   const [notes, setNotes] = useState('');
@@ -108,8 +63,7 @@ export default function CheckoutPage() {
     byStore[sid].push(ci);
   });
   
-  const availableCities = address.province ? Object.keys(REGIONS[address.province] || {}) : [];
-  const availableSubdistricts = address.province && address.city ? (REGIONS[address.province]?.[address.city] || []) : [];
+  const storeCount = Object.keys(byStore).length || 1;
 
   let totalShippingCost = 0;
   Object.keys(byStore).forEach(storeId => {
@@ -127,12 +81,12 @@ export default function CheckoutPage() {
     }
   });
 
-  const storeCount = Object.keys(byStore).length || 1;
+
   const shippingCost = selectedCourier === 'COD' ? 0 : totalShippingCost;
   const total = subtotal + shippingCost;
 
   const handleOrder = async () => {
-    if (!address.name || !address.phone || !address.detail || !address.province || !address.city || !address.subdistrict || !address.rt || !address.rw) { toast.error('Lengkapi alamat pengiriman!'); return; }
+    if (!address.name || !address.phone || !address.detail || !address.province || !address.city || !address.subdistrict || !address.kelurahan || !address.rt || !address.rw) { toast.error('Lengkapi alamat pengiriman!'); return; }
     if (isDropship && (!dropshipInfo.name || !dropshipInfo.phone)) { toast.error('Lengkapi nama & nomor HP pengirim dropship!'); return; }
     if (!selectedBank) { toast.error('Pilih metode pembayaran!'); return; }
     
@@ -244,9 +198,10 @@ export default function CheckoutPage() {
                 <div className="sm:col-span-2">
                   <Input placeholder="Alamat Lengkap (Jalan, No Rumah) *" value={address.detail} onChange={v => setAddress(a => ({ ...a, detail: v }))} />
                 </div>
-                <Select placeholder="Pilih Provinsi *" value={address.province} options={PROVINCES} onChange={v => setAddress(a => ({ ...a, province: v, city: '', subdistrict: '' }))} />
-                <Select placeholder="Pilih Kota/Kabupaten *" value={address.city} options={availableCities} onChange={v => setAddress(a => ({ ...a, city: v, subdistrict: '' }))} />
-                <Select placeholder="Pilih Kecamatan/Kelurahan *" value={address.subdistrict} options={availableSubdistricts} onChange={v => setAddress(a => ({ ...a, subdistrict: v }))} />
+                <Input placeholder="Provinsi *" value={address.province} onChange={v => setAddress(a => ({ ...a, province: v }))} />
+                <Input placeholder="Kota/Kabupaten *" value={address.city} onChange={v => setAddress(a => ({ ...a, city: v }))} />
+                <Input placeholder="Kecamatan *" value={address.subdistrict} onChange={v => setAddress(a => ({ ...a, subdistrict: v }))} />
+                <Input placeholder="Kelurahan *" value={address.kelurahan} onChange={v => setAddress(a => ({ ...a, kelurahan: v }))} />
                 <div className="grid grid-cols-2 gap-4">
                   <Select placeholder="RT *" value={address.rt} options={RTS} onChange={v => setAddress(a => ({ ...a, rt: v }))} />
                   <Select placeholder="RW *" value={address.rw} options={RWS} onChange={v => setAddress(a => ({ ...a, rw: v }))} />

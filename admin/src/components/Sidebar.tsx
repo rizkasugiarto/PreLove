@@ -2,8 +2,35 @@ import React from 'react';
 import Link from 'next/link';
 import { 
   LayoutDashboard, Users, ShoppingBag, AlertTriangle, 
-  Settings, LogOut, CheckCircle2, ShieldAlert
+  LogOut
 } from 'lucide-react';
+
+const LogoIcon = () => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+    <div style={{
+      width: '42px', height: '42px',
+      background: 'linear-gradient(135deg, #D946EF, #A855F7)',
+      border: '2.5px solid #111827',
+      borderRadius: '50%',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      transform: 'rotate(-8deg)',
+      boxShadow: '4px 4px 0 #111827',
+      flexShrink: 0,
+    }}>
+      <ShoppingBag size={20} color="white" strokeWidth={2.5} />
+    </div>
+    <div>
+      <div style={{
+        fontWeight: 900, fontSize: '18px', color: 'white',
+        letterSpacing: '-0.05em', textTransform: 'uppercase',
+        lineHeight: 1,
+      }}>
+        PRELOVE<span style={{ color: '#D946EF', fontSize: '22px' }}>.</span>
+      </div>
+      <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', margin: 0, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Admin</p>
+    </div>
+  </div>
+);
 
 interface SidebarProps {
   activeTab: string;
@@ -21,12 +48,8 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
   return (
     <aside className="w-64 bg-slate-900 text-white min-h-screen p-4 flex flex-col justify-between">
       <div>
-        <div className="flex items-center gap-2 px-2 py-4 mb-6">
-          <ShieldAlert className="text-violet-400 w-8 h-8" />
-          <div>
-            <h1 className="font-extrabold text-xl tracking-tight text-white">PreLove</h1>
-            <p className="text-xs text-slate-400 font-medium">Admin Workspace</p>
-          </div>
+        <div className="px-2 py-4 mb-6">
+          <LogoIcon />
         </div>
 
         <nav className="space-y-1">

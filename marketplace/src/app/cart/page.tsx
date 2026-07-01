@@ -235,6 +235,7 @@ export default function CartPage() {
                 <button
                   onClick={() => {
                     if (selectedItems.length === 0) { toast.error('Pilih barang yang mau dicheckout!'); return; }
+                    if (subtotal < 50) { toast.error('Minimum belanja Rp 50!'); return; }
                     router.push(`/checkout?items=${selectedItems.join(',')}`);
                   }}
                   disabled={selectedItems.length === 0}
@@ -246,6 +247,12 @@ export default function CartPage() {
                 >
                   Checkout Sekarang <ArrowRight size={20} />
                 </button>
+                
+                {selectedItems.length > 0 && subtotal < 50 && (
+                  <p style={{ textAlign: 'center', fontSize: '12px', color: '#EF4444', fontWeight: 700, margin: 0 }}>
+                    ⚠️ Minimum belanja Rp 50
+                  </p>
+                )}
                 
                 <Link href="/" style={{ display: 'block', textAlign: 'center', fontSize: '14px', fontWeight: 800, color: '#6B7280', textDecoration: 'none', transition: 'color 0.2s' }} className="hover:text-purple-600">
                   ← Lanjut Belanja

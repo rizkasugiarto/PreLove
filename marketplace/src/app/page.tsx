@@ -36,28 +36,7 @@ const STATS = [
   { emoji: '⭐', value: 98, suffix: '%', label: 'Kepuasan Pembeli' },
 ];
 
-/* ── Animated Counter ─────────────────────────────────── */
-function Counter({ value, suffix }: { value: number; suffix: string }) {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  useEffect(() => {
-    const obs = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) {
-        let start = 0;
-        const step = value / 60;
-        const t = setInterval(() => {
-          start += step;
-          if (start >= value) { setCount(value); clearInterval(t); }
-          else setCount(Math.floor(start));
-        }, 16);
-        obs.disconnect();
-      }
-    }, { threshold: 0.5 });
-    if (ref.current) obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, [value]);
-  return <span ref={ref}>{count.toLocaleString('id-ID')}{suffix}</span>;
-}
+
 
 /* ── Main Page ────────────────────────────────────────── */
 export default function HomePage() {
@@ -78,7 +57,6 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => { fetchProducts(); fetchFlashProducts(); }, [activeCategory]);
-
   const fetchProducts = async () => {
     setLoading(true);
     let q = supabase
@@ -145,7 +123,7 @@ export default function HomePage() {
               </div>
 
               <div className="pl-hero-trust animate-fade-in stagger-4">
-                {['✅ 12.400+ Pengguna', '🛡️ 100% Aman', '⚡ Pengiriman Cepat', '💜 Ramah Mahasiswa'].map(t => (
+                {['🛡️ 100% Aman', '⚡ Pengiriman Cepat', '💜 Ramah Mahasiswa'].map(t => (
                   <span key={t} className="pl-trust-chip">{t}</span>
                 ))}
               </div>
@@ -334,21 +312,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ═══════════════ STATS ═══════════════ */}
-      <section className="pl-section pl-section-dark">
-        <div className="pl-container">
-          <div className="pl-stats-grid">
-            {STATS.map((s, i) => (
-              <div key={i} className="pl-stat-item">
-                <div className="pl-stat-emoji">{s.emoji}</div>
-                <div className="pl-stat-value"><Counter value={s.value} suffix={s.suffix} /></div>
-                <div className="pl-stat-label">{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ═══════════════ COMMUNITY CTA ═══════════════ */}
       <section className="pl-section pl-section-gradient">
         <div className="pl-container">
@@ -357,7 +320,7 @@ export default function HomePage() {
             <div className="pl-comm-bg-orb pl-comm-orb-2" />
             <div className="pl-comm-content">
               <div className="pl-comm-badge"><Users size={14} /> Komunitas PreLove</div>
-              <h2 className="pl-comm-title">Bergabung Bersama<br />12.000+ Mahasiswa</h2>
+              <h2 className="pl-comm-title">Bergabung Bersama<br />Mahasiswa Lainnya</h2>
               <p className="pl-comm-sub">
                 Ubah barang bekasmu menjadi uang saku tambahan. Temukan harta karun dengan harga miring. Mari bersama wujudkan kampus ramah lingkungan!
               </p>

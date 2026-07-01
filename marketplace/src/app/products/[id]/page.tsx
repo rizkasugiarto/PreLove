@@ -277,7 +277,7 @@ export default function ProductDetailPage() {
 
               {/* Store & Safety */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div onClick={() => router.push(`/store/${product.store?.slug}`)}
+                <div onClick={() => router.push(`/store/${product.store?.slug ?? product.store?.id}`)}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: 'rgba(255,255,255,0.5)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.8)', cursor: 'pointer', transition: 'all 0.2s' }}
                   className="hover:bg-white hover:shadow-md group">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>

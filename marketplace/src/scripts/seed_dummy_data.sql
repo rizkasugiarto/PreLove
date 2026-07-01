@@ -7,6 +7,7 @@ DECLARE
   seller2_id UUID := 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
   buyer1_id UUID := 'cccccccc-cccc-cccc-cccc-cccccccccccc';
   buyer2_id UUID := 'dddddddd-dddd-dddd-dddd-dddddddddddd';
+  admin1_id UUID := 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee';
   
   cat_wanita UUID;
   cat_pria UUID;
@@ -38,7 +39,8 @@ BEGIN
   ('00000000-0000-0000-0000-000000000000', seller1_id, 'authenticated', 'authenticated', 'seller1@prelove.test', enc_password, now(), '{"provider": "email", "providers": ["email"]}', '{"full_name": "Rina Maharani", "username": "rina_hijab"}', now(), now(), '', '', '', ''),
   ('00000000-0000-0000-0000-000000000000', seller2_id, 'authenticated', 'authenticated', 'seller2@prelove.test', enc_password, now(), '{"provider": "email", "providers": ["email"]}', '{"full_name": "Siti Nurhaliza", "username": "siti_modesty"}', now(), now(), '', '', '', ''),
   ('00000000-0000-0000-0000-000000000000', buyer1_id, 'authenticated', 'authenticated', 'buyer1@prelove.test', enc_password, now(), '{"provider": "email", "providers": ["email"]}', '{"full_name": "Anisa Rahmawati", "username": "anisa_buyer"}', now(), now(), '', '', '', ''),
-  ('00000000-0000-0000-0000-000000000000', buyer2_id, 'authenticated', 'authenticated', 'buyer2@prelove.test', enc_password, now(), '{"provider": "email", "providers": ["email"]}', '{"full_name": "Dewi Kartika", "username": "dewi_buyer"}', now(), now(), '', '', '', '')
+  ('00000000-0000-0000-0000-000000000000', buyer2_id, 'authenticated', 'authenticated', 'buyer2@prelove.test', enc_password, now(), '{"provider": "email", "providers": ["email"]}', '{"full_name": "Dewi Kartika", "username": "dewi_buyer"}', now(), now(), '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000', admin1_id, 'authenticated', 'authenticated', 'admin@prelove.test', enc_password, now(), '{"provider": "email", "providers": ["email"]}', '{"full_name": "Super Admin", "username": "admin_super"}', now(), now(), '', '', '', '')
   ON CONFLICT (id) DO NOTHING;
 
   -- 3. Update Profiles (trigger will auto-create them, so we DO UPDATE)
@@ -46,7 +48,8 @@ BEGIN
   (seller1_id, 'rina_hijab', 'Rina Maharani', 'seller'),
   (seller2_id, 'siti_modesty', 'Siti Nurhaliza', 'seller'),
   (buyer1_id, 'anisa_buyer', 'Anisa Rahmawati', 'customer'),
-  (buyer2_id, 'dewi_buyer', 'Dewi Kartika', 'customer')
+  (buyer2_id, 'dewi_buyer', 'Dewi Kartika', 'customer'),
+  (admin1_id, 'admin_super', 'Super Admin', 'admin')
   ON CONFLICT (id) DO UPDATE SET role = EXCLUDED.role, username = EXCLUDED.username;
 
   -- 4. Create Stores

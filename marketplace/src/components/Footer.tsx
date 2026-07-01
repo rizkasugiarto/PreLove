@@ -16,15 +16,18 @@ export default function Footer() {
         {/* Brand + tagline */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '48px' }}>
           <div style={{
-            width: '42px', height: '42px', borderRadius: '14px',
-            background: 'linear-gradient(135deg, #7C3AED, #DB2777)',
+            width: '42px', height: '42px', borderRadius: '50%',
+            background: 'linear-gradient(135deg, #D946EF, #A855F7)',
+            border: '2.5px solid #111827',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 8px 20px rgba(124,58,237,0.35)',
+            transform: 'rotate(-8deg)',
+            boxShadow: '4px 4px 0 #111827',
+            flexShrink: 0,
           }}>
-            <ShoppingBag size={22} color="white" />
+            <ShoppingBag size={20} color="white" strokeWidth={2.5} />
           </div>
           <div>
-            <span style={{ fontWeight: 900, fontSize: '20px', color: 'white', letterSpacing: '-0.5px' }}>PreLove</span>
+            <span style={{ fontWeight: 900, fontSize: '20px', color: 'white', letterSpacing: '-0.05em', textTransform: 'uppercase' }}>PRELOVE<span style={{ color: '#D946EF', fontSize: '24px' }}>.</span></span>
             <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', margin: 0, fontWeight: 500 }}>Platform Preloved Terpercaya</p>
           </div>
         </div>
