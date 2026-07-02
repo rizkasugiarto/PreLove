@@ -102,7 +102,7 @@ export default function DashboardView() {
           </div>
           <h3 className="text-2xl font-bold">Panduan Moderasi Produk & User</h3>
           <p className="text-slate-300 text-sm leading-relaxed">
-            Sebagai Administrator PreLove, pastikan untuk selalu memeriksa laporan yang masuk secara berkala. Tindakan pemblokiran user atau penghapusan barang bekas ilegal wajib mengikuti kode etik perlindungan privasi mahasiswa dan aturan jual beli kampus.
+            Sebagai Administrator PreLove, pastikan untuk selalu memeriksa laporan yang masuk secara berkala. Tindakan pemblokiran user atau penghapusan barang bekas ilegal wajib mengikuti kode etik perlindungan privasi pengguna dan aturan jual beli platform.
           </p>
         </div>
         <div className="absolute right-0 bottom-0 top-0 w-1/3 opacity-10 bg-[radial-gradient(circle_at_bottom_right,var(--tw-gradient-stops))] from-violet-400 to-transparent pointer-events-none" />

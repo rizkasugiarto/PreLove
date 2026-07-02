@@ -14,9 +14,9 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'PreLove - Platform Marketplace Barang Preloved Mahasiswa',
-  description: 'Jual beli barang preloved berkualitas untuk mahasiswa dan masyarakat umum secara aman, mudah, dan berkelanjutan.',
-  keywords: ['preloved', 'second hand', 'bekas', 'jual beli', 'mahasiswa', 'eco-friendly', 'prelove'],
+  title: 'PreLove - Platform Marketplace Barang Preloved Terbaik',
+  description: 'Jual beli barang preloved berkualitas secara aman, mudah, dan berkelanjutan.',
+  keywords: ['preloved', 'second hand', 'bekas', 'jual beli', 'eco-friendly', 'prelove'],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -21,6 +21,7 @@ const glass = {
 export default function SearchPage() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
+  const categorySlug = searchParams.get('category_slug');
 
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,6 +29,14 @@ export default function SearchPage() {
   const [filters, setFilters] = useState({ category: '', condition: '', minPrice: '', maxPrice: '' });
 
   useEffect(() => { fetchCategories(); }, []);
+  
+  useEffect(() => {
+    if (categories.length > 0 && categorySlug && !filters.category) {
+      const cat = categories.find(c => c.slug === categorySlug);
+      if (cat) setFilters(f => ({ ...f, category: cat.id }));
+    }
+  }, [categories, categorySlug, filters.category]);
+
   useEffect(() => { fetchResults(); }, [query, filters]);
 
   const fetchCategories = async () => {

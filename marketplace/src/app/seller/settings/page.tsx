@@ -232,21 +232,21 @@ export default function StoreSettingsPage() {
                     </div>
                   </div>
 
-                  {/* District (Kecamatan) */}
-                  <div>
-                    <label style={labelStyle}>Kecamatan <span style={{ color: '#EF4444' }}>*</span></label>
-                    <div style={{ position: 'relative' }}>
-                      <MapPin style={iconStyle} size={18} />
-                      <input required type="text" placeholder="Sukajadi" value={form.district} onChange={e => setForm(f => ({ ...f, district: e.target.value }))} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
-                    </div>
-                  </div>
-
                   {/* Subdistrict (Kelurahan) */}
                   <div>
                     <label style={labelStyle}>Kelurahan <span style={{ color: '#EF4444' }}>*</span></label>
                     <div style={{ position: 'relative' }}>
                       <MapPin style={iconStyle} size={18} />
                       <input required type="text" placeholder="Pasteur" value={form.subdistrict} onChange={e => setForm(f => ({ ...f, subdistrict: e.target.value }))} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+                    </div>
+                  </div>
+
+                  {/* District (Kecamatan) */}
+                  <div>
+                    <label style={labelStyle}>Kecamatan <span style={{ color: '#EF4444' }}>*</span></label>
+                    <div style={{ position: 'relative' }}>
+                      <MapPin style={iconStyle} size={18} />
+                      <input required type="text" placeholder="Sukajadi" value={form.district} onChange={e => setForm(f => ({ ...f, district: e.target.value }))} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
                     </div>
                   </div>
                 </div>

@@ -48,9 +48,9 @@ export default function ProfilePage() {
     try {
       const ext = file.name.split('.').pop();
       const path = `avatars/${user.id}.${ext}`;
-      const { error } = await supabase.storage.from('prelove-public').upload(path, file, { upsert: true });
+      const { error } = await supabase.storage.from('prelove-images').upload(path, file, { upsert: true });
       if (error) throw error;
-      const { data: { publicUrl } } = supabase.storage.from('prelove-public').getPublicUrl(path);
+      const { data: { publicUrl } } = supabase.storage.from('prelove-images').getPublicUrl(path);
       setAvatarUrl(publicUrl + `?v=${Date.now()}`);
       toast.success('Foto berhasil diunggah!');
     } catch (err: any) {

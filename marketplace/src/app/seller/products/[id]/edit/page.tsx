@@ -27,6 +27,9 @@ export default function SellerEditProductPage() {
   });
   
   const [existingImages, setExistingImages] = useState<any[]>([]);
+  const [imagesToDelete, setImagesToDelete] = useState<any[]>([]);
+  const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
+  const [newImagePreviews, setNewImagePreviews] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [fetching, setFetching] = useState(true);
 
@@ -78,6 +81,35 @@ export default function SellerEditProductPage() {
     setFetching(false);
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    
+    const currentTotal = existingImages.length + newImageFiles.length;
+    if (currentTotal + files.length > 5) {
+      toast.error('Maksimal 5 foto produk');
+      return;
+    }
+
+    setNewImageFiles(prev => [...prev, ...files]);
+    const previews = files.map(file => URL.createObjectURL(file));
+    setNewImagePreviews(prev => [...prev, ...previews]);
+  };
+
+  const removeExistingImage = (index: number) => {
+    const imgToRemove = existingImages[index];
+    setImagesToDelete(prev => [...prev, imgToRemove]);
+    setExistingImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeNewImage = (index: number) => {
+    setNewImageFiles(prev => prev.filter((_, i) => i !== index));
+    setNewImagePreviews(prev => {
+      URL.revokeObjectURL(prev[index]);
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !profile?.store) return;
@@ -95,6 +127,48 @@ export default function SellerEditProductPage() {
       }).eq('id', id);
 
       if (productError) throw productError;
+
+      // Handle Image Deletions
+      if (imagesToDelete.length > 0) {
+        const idsToDelete = imagesToDelete.map(img => img.id);
+        await supabase.from('product_images').delete().in('id', idsToDelete);
+      }
+
+      // Handle New Image Uploads
+      if (newImageFiles.length > 0) {
+        const maxSortOrder = existingImages.reduce((max, img) => Math.max(max, img.sort_order || 0), 0);
+        
+        for (let i = 0; i < newImageFiles.length; i++) {
+          const file = newImageFiles[i];
+          const fileName = `products/${user.id}_${Date.now()}_${i}`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from('prelove-images')
+            .upload(fileName, file, { contentType: file.type });
+            
+          if (uploadError) throw uploadError;
+          
+          const { data: urlData } = supabase.storage
+            .from('prelove-images')
+            .getPublicUrl(fileName);
+            
+          await supabase.from('product_images').insert({
+            product_id: id,
+            image_url: urlData.publicUrl,
+            is_primary: existingImages.length === 0 && i === 0,
+            sort_order: maxSortOrder + i + 1,
+          });
+        }
+      }
+
+      // Ensure there is a primary image
+      const { data: finalImages } = await supabase.from('product_images').select('*').eq('product_id', id).order('sort_order');
+      if (finalImages && finalImages.length > 0) {
+        const hasPrimary = finalImages.some(img => img.is_primary);
+        if (!hasPrimary) {
+          await supabase.from('product_images').update({ is_primary: true }).eq('id', finalImages[0].id);
+        }
+      }
 
       toast.success('Produk berhasil diperbarui! ✨');
       router.push('/seller/dashboard');
@@ -201,13 +275,16 @@ export default function SellerEditProductPage() {
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               
-              {/* Media Produk (Read-Only Demo) */}
+              {/* Media Produk */}
               <div>
-                <label style={labelStyle}>Foto Produk (Hanya Tampil)</label>
+                <label style={labelStyle}>Foto Produk (Max 5)</label>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
                   {existingImages.map((img, i) => (
-                    <div key={i} style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '14px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
+                    <div key={`existing-${i}`} style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '14px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
                       <img src={img.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <button type="button" onClick={() => removeExistingImage(i)} style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                        <X size={12} />
+                      </button>
                       {i === 0 && (
                         <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: '#7C3AED', color: '#fff', fontSize: '9px', fontWeight: 700, textAlign: 'center', padding: '2px 0' }}>
                           Utama
@@ -215,8 +292,34 @@ export default function SellerEditProductPage() {
                       )}
                     </div>
                   ))}
+                  
+                  {newImagePreviews.map((preview, i) => (
+                    <div key={`new-${i}`} style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '14px', border: '1px solid #E5E7EB', overflow: 'hidden' }}>
+                      <img src={preview} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <button type="button" onClick={() => removeNewImage(i)} style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,0.6)', color: '#fff', border: 'none', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                        <X size={12} />
+                      </button>
+                      {existingImages.length === 0 && i === 0 && (
+                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: '#7C3AED', color: '#fff', fontSize: '9px', fontWeight: 700, textAlign: 'center', padding: '2px 0' }}>
+                          Utama
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {(existingImages.length + newImageFiles.length) < 5 && (
+                    <label style={{ 
+                      width: '80px', height: '80px', borderRadius: '14px', 
+                      border: '2px dashed #C4B5FD', background: '#F5F3FF',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                      cursor: 'pointer', color: '#7C3AED', transition: 'all 0.2s'
+                    }}>
+                      <UploadCloud size={24} style={{ marginBottom: '4px' }} />
+                      <span style={{ fontSize: '10px', fontWeight: 600 }}>Tambah</span>
+                      <input type="file" multiple accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
+                    </label>
+                  )}
                 </div>
-                <p style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '8px' }}>*Untuk mengganti foto produk, harap hapus produk dan buat baru (untuk versi ini).</p>
               </div>
 
               {/* Nama Produk */}

@@ -2,19 +2,31 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
+import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { Upload, Store, ArrowRight, MapPin, Building, Phone, ShoppingBag, FileText } from 'lucide-react';
 
 export default function OpenStorePage() {
-  const { user, refreshProfile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const router = useRouter();
-  const [form, setForm] = useState({ name: '', description: '', phone: '', address: '', city: '', province: '' });
+  const [form, setForm] = useState({ 
+    name: '', description: '', phone: '', 
+    address: '', city: '', province: '',
+    kecamatan: '', kelurahan: '', rt: '', rw: ''
+  });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1); // 2-step form
+
+  useEffect(() => {
+    if (profile?.store && (Array.isArray(profile.store) ? profile.store.length > 0 : true)) {
+      router.replace('/seller/dashboard');
+    }
+  }, [profile, router]);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -41,6 +53,8 @@ export default function OpenStorePage() {
         logo_url: logoUrl, description: form.description.trim(),
         address: form.address.trim(), city: form.city.trim(),
         province: form.province.trim(), phone: form.phone.trim(),
+        kecamatan: form.kecamatan.trim(), kelurahan: form.kelurahan.trim(),
+        rt_rw: `${form.rt.trim()}/${form.rw.trim()}`
       });
       if (error) throw error;
       await supabase.from('profiles').update({ role: 'seller' }).eq('id', user!.id);
@@ -55,11 +69,11 @@ export default function OpenStorePage() {
   };
 
   const inputStyle: React.CSSProperties = {
-    width: '100%', height: '48px',
+    width: '100%', height: '50px',
     paddingLeft: '46px', paddingRight: '16px',
-    borderRadius: '14px',
-    border: '1.5px solid #E5E7EB',
-    background: '#FAFAFA',
+    borderRadius: '16px',
+    border: '1.5px solid #EDE9FE',
+    background: 'rgba(245,243,255,0.6)',
     fontSize: '14px', fontWeight: 500,
     color: '#111827', outline: 'none',
     transition: 'border-color .2s ease, box-shadow .2s ease, background .2s ease',
@@ -85,11 +99,11 @@ export default function OpenStorePage() {
   const onFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     e.target.style.borderColor = '#7C3AED';
     e.target.style.background = '#fff';
-    e.target.style.boxShadow = '0 0 0 4px rgba(124,58,237,0.08)';
+    e.target.style.boxShadow = '0 0 0 4px rgba(124,58,237,0.10)';
   };
   const onBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    e.target.style.borderColor = '#E5E7EB';
-    e.target.style.background = '#FAFAFA';
+    e.target.style.borderColor = '#EDE9FE';
+    e.target.style.background = 'rgba(245,243,255,0.6)';
     e.target.style.boxShadow = 'none';
   };
 
@@ -237,7 +251,16 @@ export default function OpenStorePage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     <div>
-                      <label style={labelStyle}>Kota <span style={{ color: '#EF4444' }}>*</span></label>
+                      <label style={labelStyle}>Provinsi <span style={{ color: '#EF4444' }}>*</span></label>
+                      <div style={{ position: 'relative' }}>
+                        <MapPin style={iconStyle} size={18} />
+                        <input type="text" placeholder="Jawa Barat"
+                          value={form.province} onChange={e => setForm(f => ({ ...f, province: e.target.value }))}
+                          required style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+                      </div>
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Kota / Kabupaten <span style={{ color: '#EF4444' }}>*</span></label>
                       <div style={{ position: 'relative' }}>
                         <Building style={iconStyle} size={18} />
                         <input type="text" placeholder="Bandung"
@@ -245,24 +268,57 @@ export default function OpenStorePage() {
                           required style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
                       </div>
                     </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     <div>
-                      <label style={labelStyle}>Provinsi</label>
+                      <label style={labelStyle}>Kelurahan <span style={{ color: '#EF4444' }}>*</span></label>
                       <div style={{ position: 'relative' }}>
                         <MapPin style={iconStyle} size={18} />
-                        <input type="text" placeholder="Jawa Barat"
-                          value={form.province} onChange={e => setForm(f => ({ ...f, province: e.target.value }))}
-                          style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+                        <input type="text" placeholder="Pasteur"
+                          value={form.kelurahan} onChange={e => setForm(f => ({ ...f, kelurahan: e.target.value }))}
+                          required style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+                      </div>
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Kecamatan <span style={{ color: '#EF4444' }}>*</span></label>
+                      <div style={{ position: 'relative' }}>
+                        <MapPin style={iconStyle} size={18} />
+                        <input type="text" placeholder="Sukajadi"
+                          value={form.kecamatan} onChange={e => setForm(f => ({ ...f, kecamatan: e.target.value }))}
+                          required style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div>
+                      <label style={labelStyle}>RT <span style={{ color: '#EF4444' }}>*</span></label>
+                      <div style={{ position: 'relative' }}>
+                        <MapPin style={iconStyle} size={18} />
+                        <input type="text" placeholder="001"
+                          value={form.rt} onChange={e => setForm(f => ({ ...f, rt: e.target.value }))}
+                          required style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+                      </div>
+                    </div>
+                    <div>
+                      <label style={labelStyle}>RW <span style={{ color: '#EF4444' }}>*</span></label>
+                      <div style={{ position: 'relative' }}>
+                        <MapPin style={iconStyle} size={18} />
+                        <input type="text" placeholder="002"
+                          value={form.rw} onChange={e => setForm(f => ({ ...f, rw: e.target.value }))}
+                          required style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <label style={labelStyle}>Alamat Lengkap</label>
+                    <label style={labelStyle}>Alamat Detail <span style={{ color: '#EF4444' }}>*</span></label>
                     <div style={{ position: 'relative' }}>
                       <MapPin style={iconStyle} size={18} />
-                      <input type="text" placeholder="Jl. Sukajadi No 123..."
+                      <input type="text" placeholder="Jl. Cemara No 12, Pagar Hitam"
                         value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))}
-                        style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
+                        required style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
                     </div>
                   </div>
 
@@ -301,7 +357,7 @@ export default function OpenStorePage() {
             {/* Footer note */}
             <p style={{ textAlign: 'center', fontSize: '11px', color: '#9CA3AF', marginTop: '20px', lineHeight: 1.6 }}>
               Dengan mendaftar, kamu menyetujui{' '}
-              <a href="#" style={{ color: '#7C3AED', fontWeight: 700, textDecoration: 'none' }}>Syarat & Ketentuan</a>
+              <Link href="/terms" target="_blank" style={{ color: '#7C3AED', fontWeight: 700, textDecoration: 'none' }}>Syarat & Ketentuan</Link>
               {' '}Seller PreLove.
             </p>
           </div>

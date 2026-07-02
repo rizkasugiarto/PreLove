@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { formatPrice, CONDITIONS } from '@/lib/utils';
 import {
@@ -10,27 +11,27 @@ import {
 
 /* ── Static Data ──────────────────────────────────────── */
 const CATEGORIES = [
-  { label: 'Fashion', emoji: '👗', color: '#8B5CF6', bg: 'linear-gradient(135deg,#EDE9FE,#DDD6FE)' },
-  { label: 'Gadget',  emoji: '📱', color: '#3B82F6', bg: 'linear-gradient(135deg,#DBEAFE,#BFDBFE)' },
-  { label: 'Buku',    emoji: '📚', color: '#F59E0B', bg: 'linear-gradient(135deg,#FEF3C7,#FDE68A)' },
-  { label: 'Tas',     emoji: '👜', color: '#EC4899', bg: 'linear-gradient(135deg,#FCE7F3,#FBCFE8)' },
-  { label: 'Sepatu',  emoji: '👟', color: '#EF4444', bg: 'linear-gradient(135deg,#FEE2E2,#FECACA)' },
-  { label: 'Olahraga',emoji: '⚽', color: '#10B981', bg: 'linear-gradient(135deg,#D1FAE5,#A7F3D0)' },
-  { label: 'Beauty',  emoji: '💄', color: '#F43F5E', bg: 'linear-gradient(135deg,#FFE4E6,#FECDD3)' },
-  { label: 'Furnitur',emoji: '🪑', color: '#6366F1', bg: 'linear-gradient(135deg,#E0E7FF,#C7D2FE)' },
-  { label: 'Mainan',  emoji: '🧸', color: '#D97706', bg: 'linear-gradient(135deg,#FEF3C7,#FCD34D)' },
-  { label: 'Lainnya', emoji: '✨', color: '#7C3AED', bg: 'linear-gradient(135deg,#F3E8FF,#EDE9FE)' },
+  { label: 'Fashion', dbName: 'Fashion Wanita', slug: 'fashion-wanita', emoji: '👗', color: '#8B5CF6', bg: 'linear-gradient(135deg,#EDE9FE,#DDD6FE)' },
+  { label: 'Gadget', dbName: 'Elektronik', slug: 'elektronik', emoji: '📱', color: '#3B82F6', bg: 'linear-gradient(135deg,#DBEAFE,#BFDBFE)' },
+  { label: 'Buku', dbName: 'Buku & Alat Tulis', slug: 'buku-alat-tulis', emoji: '📚', color: '#F59E0B', bg: 'linear-gradient(135deg,#FEF3C7,#FDE68A)' },
+  { label: 'Tas', dbName: 'Tas & Aksesoris', slug: 'tas-aksesoris', emoji: '👜', color: '#EC4899', bg: 'linear-gradient(135deg,#FCE7F3,#FBCFE8)' },
+  { label: 'Sepatu', dbName: 'Sepatu', slug: 'sepatu', emoji: '👟', color: '#EF4444', bg: 'linear-gradient(135deg,#FEE2E2,#FECACA)' },
+  { label: 'Olahraga', dbName: 'Olahraga', slug: 'olahraga', emoji: '⚽', color: '#10B981', bg: 'linear-gradient(135deg,#D1FAE5,#A7F3D0)' },
+  { label: 'Pria', dbName: 'Fashion Pria', slug: 'fashion-pria', emoji: '👔', color: '#F43F5E', bg: 'linear-gradient(135deg,#FFE4E6,#FECDD3)' },
+  { label: 'Furnitur', dbName: 'Peralatan Rumah', slug: 'peralatan-rumah', emoji: '🪑', color: '#6366F1', bg: 'linear-gradient(135deg,#E0E7FF,#C7D2FE)' },
+  { label: 'Mainan', dbName: 'Mainan & Hobi', slug: 'mainan-hobi', emoji: '🧸', color: '#D97706', bg: 'linear-gradient(135deg,#FEF3C7,#FCD34D)' },
+  { label: 'Lainnya', dbName: 'Lainnya', slug: 'lainnya', emoji: '✨', color: '#7C3AED', bg: 'linear-gradient(135deg,#F3E8FF,#EDE9FE)' },
 ];
 
 const FEATURES = [
   { icon: <Shield size={28} color="#7C3AED" />, iconBg: 'linear-gradient(135deg,#EDE9FE,#DDD6FE)', title: 'Transaksi 100% Aman', desc: 'Sistem escrow & verifikasi identitas penjual aktif setiap saat.' },
   { icon: <Zap size={28} color="#3B82F6" />, iconBg: 'linear-gradient(135deg,#DBEAFE,#BFDBFE)', title: 'Pengiriman Kilat', desc: 'Terintegrasi JNE, SiCepat, AnterAja, dan layanan COD kampus.' },
   { icon: <Heart size={28} color="#EC4899" fill="#EC4899" />, iconBg: 'linear-gradient(135deg,#FCE7F3,#FBCFE8)', title: 'Barang Berkualitas', desc: 'Setiap produk diverifikasi kondisinya oleh komunitas kami.' },
-  { icon: <TrendingUp size={28} color="#10B981" />, iconBg: 'linear-gradient(135deg,#D1FAE5,#A7F3D0)', title: 'Harga Terbaik', desc: 'Nego langsung & temukan penawaran terbaik dari sesama mahasiswa.' },
+  { icon: <TrendingUp size={28} color="#10B981" />, iconBg: 'linear-gradient(135deg,#D1FAE5,#A7F3D0)', title: 'Harga Terbaik', desc: 'Nego langsung & temukan penawaran terbaik dari sesama pengguna.' },
 ];
 
 const STATS = [
-  { emoji: '🎓', value: 12400, suffix: '+', label: 'Mahasiswa Aktif' },
+  { emoji: '👥', value: 12400, suffix: '+', label: 'Pengguna Aktif' },
   { emoji: '📦', value: 8500, suffix: '+', label: 'Produk Terjual' },
   { emoji: '🏪', value: 1200, suffix: '+', label: 'Toko Terdaftar' },
   { emoji: '⭐', value: 98, suffix: '%', label: 'Kepuasan Pembeli' },
@@ -40,10 +41,10 @@ const STATS = [
 
 /* ── Main Page ────────────────────────────────────────── */
 export default function HomePage() {
+  const router = useRouter();
   const [products, setProducts] = useState<any[]>([]);
   const [flashProducts, setFlashProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [time, setTime] = useState({ h: 5, m: 47, s: 33 });
 
   useEffect(() => {
@@ -56,7 +57,7 @@ export default function HomePage() {
     return () => clearInterval(t);
   }, []);
 
-  useEffect(() => { fetchProducts(); fetchFlashProducts(); }, [activeCategory]);
+  useEffect(() => { fetchProducts(); fetchFlashProducts(); }, []);
   const fetchProducts = async () => {
     setLoading(true);
     let q = supabase
@@ -64,10 +65,7 @@ export default function HomePage() {
       .select('*, store:stores(name,slug,rating), images:product_images(*), category:categories(name,slug)')
       .eq('is_active', true).gt('stock', 0)
       .order('created_at', { ascending: false }).limit(10);
-    if (activeCategory) {
-      const { data: cat } = await supabase.from('categories').select('id').eq('name', activeCategory).single();
-      if (cat) q = q.eq('category_id', cat.id);
-    }
+    
     const { data } = await q;
     setProducts(data ?? []);
     setLoading(false);
@@ -100,7 +98,7 @@ export default function HomePage() {
             <div className="pl-hero-left">
               <div className="pl-hero-badge animate-fade-in">
                 <span>✨</span>
-                <span>Platform Preloved Mahasiswa #1</span>
+                <span>Platform Preloved Terbaik #1</span>
               </div>
 
               <h1 className="pl-hero-title animate-slide-up stagger-1">
@@ -110,7 +108,7 @@ export default function HomePage() {
               </h1>
 
               <p className="pl-hero-desc animate-slide-up stagger-2">
-                Beli dan jual barang bekas berkualitas dari sesama mahasiswa. Aman, terjangkau, dan ramah lingkungan.
+                Beli dan jual barang bekas berkualitas dari sesama pengguna. Aman, terjangkau, dan ramah lingkungan.
               </p>
 
               <div className="pl-hero-cta animate-slide-up stagger-3">
@@ -123,7 +121,7 @@ export default function HomePage() {
               </div>
 
               <div className="pl-hero-trust animate-fade-in stagger-4">
-                {['🛡️ 100% Aman', '⚡ Pengiriman Cepat', '💜 Ramah Mahasiswa'].map(t => (
+                {['🛡️ 100% Aman', '⚡ Pengiriman Cepat', '💜 Mudah Digunakan'].map(t => (
                   <span key={t} className="pl-trust-chip">{t}</span>
                 ))}
               </div>
@@ -176,18 +174,22 @@ export default function HomePage() {
 
           <div className="pl-cat-grid">
             {CATEGORIES.map((cat) => (
-              <button
+              <div
                 key={cat.label}
-                onClick={() => setActiveCategory(activeCategory === cat.label ? null : cat.label)}
-                className={`pl-cat-card${activeCategory === cat.label ? ' pl-cat-active' : ''}`}
+                onClick={() => router.push(`/search?category_slug=${cat.slug}`)}
+                className="pl-cat-card"
+                title={cat.label}
               >
-                <div className="pl-cat-icon" style={{ background: cat.bg }}>
+                <div 
+                  className="pl-cat-icon" 
+                  style={{ background: cat.bg }}
+                >
                   <span className="pl-cat-emoji">{cat.emoji}</span>
                 </div>
-                <span className="pl-cat-label" style={{ color: activeCategory === cat.label ? cat.color : undefined }}>
+                <span className="pl-cat-label">
                   {cat.label}
                 </span>
-              </button>
+              </div>
             ))}
           </div>
         </div>
@@ -244,12 +246,12 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════ MAIN PRODUCTS GRID ═══════════════ */}
-      <section className="pl-section">
+      <section className="pl-section" id="products-section" style={{ scrollMarginTop: '80px' }}>
         <div className="pl-container">
           <div className="pl-section-head">
             <div>
               <h2 className="pl-section-title">
-                {activeCategory ? `📦 Koleksi ${activeCategory}` : '🌟 Rekomendasi Terbaru'}
+                🌟 Rekomendasi Terbaru
               </h2>
               <p className="pl-section-sub">Penemuan terbaik hari ini untukmu</p>
             </div>
@@ -294,7 +296,7 @@ export default function HomePage() {
           <div className="pl-section-head pl-section-head-center">
             <div>
               <h2 className="pl-section-title" style={{ justifyContent: 'center' }}>💎 Kenapa Pilih PreLove?</h2>
-              <p className="pl-section-sub">Marketplace pilihan mahasiswa nomor 1 di Indonesia</p>
+              <p className="pl-section-sub">Marketplace preloved pilihan nomor 1 di Indonesia</p>
             </div>
           </div>
 
@@ -320,9 +322,9 @@ export default function HomePage() {
             <div className="pl-comm-bg-orb pl-comm-orb-2" />
             <div className="pl-comm-content">
               <div className="pl-comm-badge"><Users size={14} /> Komunitas PreLove</div>
-              <h2 className="pl-comm-title">Bergabung Bersama<br />Mahasiswa Lainnya</h2>
+              <h2 className="pl-comm-title">Bergabung Bersama<br />Jutaan Pengguna Lainnya</h2>
               <p className="pl-comm-sub">
-                Ubah barang bekasmu menjadi uang saku tambahan. Temukan harta karun dengan harga miring. Mari bersama wujudkan kampus ramah lingkungan!
+                Ubah barang bekasmu menjadi uang tambahan. Temukan harta karun dengan harga miring. Mari bersama wujudkan gaya hidup ramah lingkungan!
               </p>
               <div className="pl-comm-cta">
                 <Link href="/auth/register" className="pl-btn-white">

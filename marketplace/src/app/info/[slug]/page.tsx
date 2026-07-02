@@ -28,14 +28,14 @@ const PAGES: Record<string, { title: string; emoji: string; icon: any; content: 
       <>
         <div style={card}>
           <p style={{ ...ps, fontSize: '16px' }}>
-            PreLove adalah platform marketplace eksklusif yang dirancang khusus untuk mahasiswa Indonesia.
+            PreLove adalah platform marketplace eksklusif yang dirancang khusus untuk masyarakat Indonesia.
             Kami percaya setiap barang punya cerita dan berhak dapat kesempatan kedua.
           </p>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '20px' }}>
           {[
             { label: 'Visi', color: '#F5F3FF', border: '#DDD6FE', text: '#5B21B6', desc: 'Menjadi ekosistem sirkular ekonomi terbesar di lingkungan kampus seluruh Indonesia.' },
-            { label: 'Misi', color: '#ECFDF5', border: '#A7F3D0', text: '#065F46', desc: 'Mempermudah mahasiswa mencari barang berkualitas terjangkau sambil mengurangi limbah.' },
+            { label: 'Misi', color: '#ECFDF5', border: '#A7F3D0', text: '#065F46', desc: 'Mempermudah pengguna mencari barang berkualitas terjangkau sambil mengurangi limbah.' },
           ].map(v => (
             <div key={v.label} style={{ background: v.color, border: `1px solid ${v.border}`, borderRadius: '20px', padding: '24px' }}>
               <h3 style={{ fontWeight: 900, color: v.text, marginBottom: '8px' }}>{v.label} Kami</h3>
@@ -46,7 +46,7 @@ const PAGES: Record<string, { title: string; emoji: string; icon: any; content: 
         <div style={card}>
           <h2 style={h2s}>Mengapa PreLove?</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
-            {['Harga lebih terjangkau dari barang baru', 'Komunitas penjual terverifikasi mahasiswa', 'Sistem pembayaran aman & terproteksi', 'Ramah lingkungan — kurangi limbah pakaian'].map(t => (
+            {['Harga lebih terjangkau dari barang baru', 'Komunitas penjual terverifikasi', 'Sistem pembayaran aman & terproteksi', 'Ramah lingkungan — kurangi limbah pakaian'].map(t => (
               <div key={t} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <CheckCircle2 size={18} color="#7C3AED" />
                 <span style={{ fontSize: '14px', color: '#374151', fontWeight: 600 }}>{t}</span>
@@ -107,7 +107,7 @@ const PAGES: Record<string, { title: string; emoji: string; icon: any; content: 
     content: (
       <>
         <div style={card}>
-          <p style={ps}>Tips dan trik seputar gaya hidup hemat mahasiswa dan tren preloved terkini. Konten lengkap segera hadir!</p>
+          <p style={ps}>Tips dan trik seputar gaya hidup hemat dan tren preloved terkini. Konten lengkap segera hadir!</p>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
           {[

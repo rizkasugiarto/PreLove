@@ -220,7 +220,7 @@ export default function Navbar() {
                       </div>
                       <DDItem href="/orders" icon={<Package size={16} />} label="Pesanan Saya" close={() => setDropdownOpen(false)} />
 
-                      {profile?.store
+                      {(profile?.store && (Array.isArray(profile.store) ? profile.store.length > 0 : true))
                         ? <DDItem href="/seller/dashboard" icon={<Store size={16} />} label="Toko Saya" close={() => setDropdownOpen(false)} />
                         : <DDItem href="/seller/open-store" icon={<Store size={16} />} label="Buka Toko" close={() => setDropdownOpen(false)} />
                       }

@@ -64,6 +64,7 @@ PROJECT PRELOVE/
 - Fallback ke ILIKE jika FTS tidak tersedia
 - Filter: kategori, kondisi barang, harga min–maks
 - Reset filter instan
+- Badge **Toko Terverifikasi** (Centang Biru) pada pencarian dan detail produk
 
 ### 📦 Produk
 - Halaman detail produk: galeri foto responsif (1:1 aspect ratio, max 480px), deskripsi, kondisi barang
@@ -289,11 +290,17 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 ### 3. Setup Database
 
-Jalankan migrations di Supabase SQL Editor secara urutan:
+Jalankan migrations di Supabase SQL Editor secara berurutan:
 
 ```
 supabase/migrations/001_initial_schema.sql
 supabase/migrations/002_seed_data.sql
+supabase/migrations/003_add_verified_seller_and_search.sql
+supabase/migrations/003_fix_product_delete.sql
+supabase/migrations/004_add_detailed_address_to_stores.sql
+supabase/migrations/004_fix_auth_trigger.sql
+supabase/migrations/004_reserve_stock_system.sql
+supabase/migrations/005_fix_checkout_rpc.sql
 ```
 
 ### 4. Jalankan Web App (Marketplace)

@@ -60,7 +60,7 @@ const BANNERS = [
   {
     id: '3',
     title: 'Buku & Perlengkapan',
-    subtitle: 'Koleksi buku pilihan mahasiswa',
+    subtitle: 'Koleksi buku pilihan untukmu',
     emoji: '📚',
     gradientFrom: '#6D28D9',
     gradientTo: '#8B5CF6',
